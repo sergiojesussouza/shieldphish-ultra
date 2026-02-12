@@ -23,15 +23,16 @@ st.markdown("""
         margin-bottom: 1.5rem !important;
     }
 
-    /* 2. PADRONIZAÇÃO DOS BOTÕES: Iguais no 14" e no 15" */
+    /* 2. PADRONIZAÇÃO DOS BOTÕES: Iguais em todas as telas */
     .stButton button {
-        width: 100% !important;
-        max-width: 250px !important; /* Tamanho ideal para não esticar no 15" */
-        height: 3.5rem !important;    /* Altura idêntica para todos */
-        font-size: 1rem !important;
-        font-weight: bold !important;
-        white-space: nowrap !important;
-        margin-bottom: 0px !important;
+    width: 100% !important;
+    height: 3.5rem !important;    /* Mantém a altura idêntica */
+    font-size: 1rem !important;
+    font-weight: bold !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     }
 
     /* 3. ALINHAMENTO DAS COLUNAS */
@@ -205,13 +206,13 @@ with col2:
 
         # Exibe apenas os últimos 10 registros
         st.dataframe(
-                df_exibir.head(10), # Mostra as 10 últimas análises feitas
-                use_container_width=True,
-                hide_index=True,
-                column_config={
-                    "Hora": st.column_config.TextColumn("Hora", width="small"),
-                    "Alvo": st.column_config.TextColumn("Alvo", width="medium"),
-                    "Resultado": st.column_config.TextColumn("Resultado", width="medium")
+            df_exibir.head(10), # Mostra as 10 últimas análises feitas
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Hora": st.column_config.TextColumn("Hora", width="small"),
+                "Alvo": st.column_config.TextColumn("Alvo", width="medium"),
+                "Resultado": st.column_config.TextColumn("Resultado", width="medium")
                 }
         )
 # --- CENTRAL DE EXPORTAÇÃO MULTIFORMATO ---
