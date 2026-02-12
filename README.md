@@ -1,85 +1,28 @@
-🛡️ ShieldPhish Ultra — Detector de Phishing
+🛡️ ShieldPhish Ultra — Inteligência Artificial Contra Phishing
 
-ShieldPhish Ultra é uma ferramenta de segurança voltada para a detecção de phishing e links maliciosos em tempo real. Utilizando a API do VirusTotal, o sistema realiza análises de reputação de domínios e verificação de arquivos via hash, garantindo uma proteção rápida e eficiente.
+O ShieldPhish Ultra é uma plataforma avançada de cibersegurança projetada para detectar tentativas de phishing, domínios maliciosos e anexos perigosos em tempo real. Diferente de ferramentas convencionais, o sistema combina Inteligência Artificial (Machine Learning) com múltiplas camadas de análise heurística para garantir um veredito de alta precisão.
 
-🚀 Funcionalidades
+🚀 Funcionalidades de Elite
 
-✔ Análise de Links
-Verifica URLs em busca de padrões de fraude, histórico de malware e reputação do domínio.
+O sistema utiliza um motor de análise híbrido que verifica:
 
-✔ Scanner de Arquivos
-Permite upload de anexos para análise via hash na base do VirusTotal.
+•	🧠 Motor de IA (Random Forest): Classificação preditiva de URLs utilizando o modelo Random Forest Classifier, treinado para identificar padrões sutis de fraude em strings de texto.
+•	🌍 Geolocalização e Infraestrutura: Rastreamento do IP do servidor, identificando o país de origem e o provedor (ASN) para detectar hospedagens em zonas de risco.
+•	🔡 Detecção de Ataques Homográficos: Identificação de caracteres visuais falsos (Punnycode) que tentam imitar sites de instituições financeiras e redes sociais.
+•	📊 Análise de Entropia de Shannon: Medição matemática da aleatoriedade do domínio para detectar URLs geradas por algoritmos (DGAs) de malwares.
+•	📏 Distância de Levenshtein: Verificação de similaridade com marcas famosas para prevenção de Typosquatting.
+•	📥 Central de Auditoria: Exportação de relatórios completos em formatos CSV, Excel, JSON e HTML.
 
-✔ Interface Intuitiva
-Construído com Streamlit, oferecendo uma experiência de usuário simples e ágil.
+🔐 Selo de Metodologia — Privacidade e Rigor
 
-🔐 Selo de Metodologia — Privacidade Garantida
+Este sistema foi construído sob o princípio de Zero Trust:
+•	Privacidade: Processamento em memória volátil, sem armazenamento de e-mails ou dados sensíveis.
+•	Transparência: Exibição clara do cálculo de score baseado em evidências técnicas (IA, Entropia e Reputação Global).
 
-Este sistema não armazena e-mails, senhas ou conteúdos analisados.
-Toda análise é processada em memória e descartada ao final da sessão, garantindo total privacidade e segurança dos dados do usuário.
+🛠️ Stack Tecnológica
+•	Linguagem: Python 3.10+
+•	Interface: Streamlit (Layout responsivo otimizado para notebooks de 14" e 15")
+•	IA/ML: Scikit-Learn (Random Forest), CountVectorizer
+•	Segurança: VirusTotal API v3 (vt-py)
+•	Manipulação de Dados: Pandas, Levenshtein, Tldextract
 
-🛠️ Tecnologias Utilizadas
-
-Python
-
-Streamlit
-
-VirusTotal API
-
-Git/GitHub
-
-🔒 Segurança e Boas Práticas
-
-O projeto segue padrões rigorosos de segurança:
-
-✅ Gerenciamento de Segredos
-A chave da API não é exposta no código e é gerenciada via Secrets do Streamlit.
-
-✅ .gitignore configurado
-Arquivos sensíveis como .streamlit/secrets.toml são ignorados no controle de versão.
-
-📌 Como executar localmente
-
-Siga os passos abaixo:
-
-# 1. Clone o repositório
-git clone <URL_DO_REPOSITORIO>
-
-# 2. Entre na pasta do projeto
-cd shieldphish-ultra
-
-# 3. Crie um ambiente virtual
-python -m venv venv
-
-# 4. Ative o ambiente
-# Windows
-venv\Scripts\activate
-
-# macOS/Linux
-source venv/bin/activate
-
-# 5. Instale as dependências
-pip install -r requirements.txt
-
-# 6. Crie o arquivo de secrets
-mkdir -p .streamlit
-touch .streamlit/secrets.toml
-
-
-Adicione sua chave da API no arquivo .streamlit/secrets.toml:
-
-[general]
-VT_API_KEY = "SUA_VT_API_KEY_AQUI"
-
-# 7. Execute o app
-streamlit run app.py
-
-⚙️ Roadmap (Futuras melhorias)
-
-📊 Dashboard com estatísticas de detecções
-
-🔍 Análise heurística avançada
-
-🔗 Integração com outros serviços de threat intelligence
-
-🔔 Alertas em tempo real via e-mail/Telegram
