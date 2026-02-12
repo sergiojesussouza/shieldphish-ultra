@@ -177,7 +177,7 @@ with aba_links:
                         st.warning(f"⏳ **Domínio Recente:** Criado há apenas {idade} dias.")
 
                     # Histórico persistente com Geolocalização e Horário
-                    st.session_state.historico.insert(0, {
+                    st.session_state.historico.append({
                         "Hora": get_brasilia_time(),
                         "Alvo": url_input, 
                         "Resultado": res_core['status'],
