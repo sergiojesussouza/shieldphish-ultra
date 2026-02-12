@@ -191,7 +191,7 @@ with aba_links:
 with col2:
     st.markdown("### 🕒 Histórico de Análises")
     if st.session_state.historico:
-        # Remova o .iloc[::-1] para usar a ordem direta do insert(0)
+        # Criar o DataFrame sem inverter (a lista já está na ordem certa)
         df_exibir = pd.DataFrame(st.session_state.historico)
 
         # Exibe apenas os últimos 10 registros
