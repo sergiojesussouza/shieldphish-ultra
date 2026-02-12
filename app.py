@@ -187,14 +187,14 @@ with aba_links:
                         st.warning(f"⏳ **Domínio Recente:** Criado há apenas {idade} dias.")
 
                     # Histórico persistente com Geolocalização e Horário
-                    st.session_state.historico.append({
+                    st.session_state.historico.insert(0, {
                         "Hora": get_brasilia_time(),
                         "Alvo": url_input, 
                         "Resultado": res_core['status'],
                         "País": res_core['geo']['pais'], 
                         "Provedor": res_core['geo']['provedor']
                     })
-            else:
+            
                 st.warning("Por favor, insira um dado válido para análise.")
 
 # --- ESTA LINHA (191) DEVE FICAR TOTALMENTE À ESQUERDA, FORA DO IF ---
@@ -202,7 +202,8 @@ with col2:
     st.markdown("### 🕒 Histórico de Análises")
     if st.session_state.historico:
         # Criar o DataFrame e inverter a ordem (Mais recente no topo)
-        df_exibir = pd.DataFrame(st.session_state.historico).iloc[::-1]
+        df_exibir = pd.DataFrame(st.session_state.historico)
+        st.dataframe(df_exibir.head(10), use_container_width=True, hide_index=True)
 
         # Exibe apenas os últimos 10 registros
         st.dataframe(
@@ -215,6 +216,7 @@ with col2:
                 "Resultado": st.column_config.TextColumn("Resultado", width="medium")
                 }
         )
+        
 # --- CENTRAL DE EXPORTAÇÃO MULTIFORMATO ---
     st.markdown("### 📥 Exportar Relatório de Auditoria")
 
