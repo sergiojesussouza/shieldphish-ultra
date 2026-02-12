@@ -11,6 +11,35 @@ from shieldphish_ultra_core import ShieldPhishUltraCore
 VT_API_KEY = st.secrets["VT_API_KEY"]
 
 st.set_page_config(page_title="ShieldPhish Ultra", page_icon="🛡️", layout="wide")
+st.markdown("""
+    <style>
+    /* 1. TÍTULO DE EXPORTAÇÃO: Garante linha única em notebooks */
+    h3 {
+        white-space: nowrap !important;
+        width: 100% !important;
+        font-size: 1.15rem !important; 
+        margin-bottom: 1rem !important;
+    }
+
+    /* 2. PADRONIZAÇÃO DE TODOS OS BOTÕES: Mesma altura e largura padrão */
+    .stButton button, .stDownloadButton button {
+        width: 100% !important;
+        height: 3.5rem !important;    
+        font-size: 0.95rem !important; 
+        font-weight: bold !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* 3. SIMETRIA DAS COLUNAS: Botões alinhados lado a lado em qualquer tela */
+    div[data-testid="column"] {
+        display: flex !important;
+        width: 100% !important;
+        flex: 1 1 0% !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Inicializa o motor de IA Profissional
 if 'engine' not in st.session_state:
@@ -148,7 +177,7 @@ with aba_links:
                         st.warning(f"⏳ **Domínio Recente:** Criado há apenas {idade} dias.")
 
                     # Histórico persistente com Geolocalização e Horário
-                    st.session_state.historico.append({
+                    st.session_state.historico.insert(0, {
                         "Hora": get_brasilia_time(),
                         "Alvo": url_input, 
                         "Resultado": res_core['status'],
@@ -162,8 +191,8 @@ with aba_links:
 with col2:
     st.markdown("### 🕒 Histórico de Análises")
     if st.session_state.historico:
-        # Criar o DataFrame e inverter a ordem (Mais recente no topo)
-        df_exibir = pd.DataFrame(st.session_state.historico).iloc[::-1]
+        # Remova o .iloc[::-1] para usar a ordem direta do insert(0)
+        df_exibir = pd.DataFrame(st.session_state.historico)
 
         # Exibe apenas os últimos 10 registros
         st.dataframe(
