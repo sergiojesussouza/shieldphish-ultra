@@ -38,8 +38,9 @@ st.markdown("""
     /* 3. ALINHAMENTO DAS COLUNAS */
     div[data-testid="column"] {
         display: flex !important;
-        justify-content: flex-start !important; /* Alinha à esquerda como na foto */
-        min-width: fit-content !important;
+        justify-content: center !important; 
+        width: 100% !important;
+        flex: 1 1 0% !important;
     }
 
     /* 4. AJUSTE PARA O BOTÃO DO GOOGLE (Não quebrar linha) */
@@ -203,7 +204,6 @@ with col2:
     if st.session_state.historico:
         # Criar o DataFrame e inverter a ordem (Mais recente no topo)
         df_exibir = pd.DataFrame(st.session_state.historico)
-        st.dataframe(df_exibir.head(10), use_container_width=True, hide_index=True)
 
         # Exibe apenas os últimos 10 registros
         st.dataframe(
@@ -214,7 +214,7 @@ with col2:
                 "Hora": st.column_config.TextColumn("Hora", width="small"),
                 "Alvo": st.column_config.TextColumn("Alvo", width="medium"),
                 "Resultado": st.column_config.TextColumn("Resultado", width="medium")
-                }
+            }
         )
         
 # --- CENTRAL DE EXPORTAÇÃO MULTIFORMATO ---
