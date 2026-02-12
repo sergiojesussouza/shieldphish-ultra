@@ -22,7 +22,7 @@ Este sistema foi construído sob o princípio de **Zero Trust**:
 ## 🛠️ Stack Tecnológica
 
 * 🐍 **Linguagem:** Python 3.10+
-* 💻 **Interface:** Streamlit (Layout responsivo otimizado para notebooks de 14" e 15")
+* 💻 **Interface:** Streamlit (Layout totalmente responsivo, otimizado para desktops, notebooks, tablets e smartphones)
 * 🤖 **IA/ML:** Scikit-Learn (Random Forest), CountVectorizer
 * 🛡️ **Segurança:** VirusTotal API v3 (vt-py)
 * 📊 **Dados:** Pandas, Levenshtein, Tldextract
