@@ -12,46 +12,6 @@ VT_API_KEY = st.secrets["VT_API_KEY"]
 
 st.set_page_config(page_title="ShieldPhish Ultra", page_icon="🛡️", layout="wide")
 
-st.markdown("""
-    <style>
-    /* 1. TÍTULO DE EXPORTAÇÃO: Força linha única em qualquer tela */
-    h3 {
-        white-space: nowrap !important;
-        display: block !important;
-        width: 100% !important;
-        font-size: 1.5rem !important;
-        margin-bottom: 1.5rem !important;
-    }
-
-    /* 2. PADRONIZAÇÃO DOS BOTÕES: Iguais em todas as telas */
-    .stButton button {
-    width: 100% !important;
-    height: 3.5rem !important;    /* Mantém a altura idêntica */
-    font-size: 1rem !important;
-    font-weight: bold !important;
-    white-space: nowrap !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    }
-
-    /* 3. ALINHAMENTO DAS COLUNAS */
-    div[data-testid="column"] {
-        display: flex !important;
-        justify-content: center !important; 
-        width: 100% !important;
-        flex: 1 1 0% !important;
-    }
-
-    /* 4. AJUSTE PARA O BOTÃO DO GOOGLE (Não quebrar linha) */
-    /* Este seletor garante que o botão de denúncia tenha espaço suficiente */
-    div[data-testid="column"] .stButton button {
-        max-width: 400px !important; 
-        padding: 0 20px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
 # Inicializa o motor de IA Profissional
 if 'engine' not in st.session_state:
     st.session_state.engine = ShieldPhishUltraCore()
@@ -188,14 +148,14 @@ with aba_links:
                         st.warning(f"⏳ **Domínio Recente:** Criado há apenas {idade} dias.")
 
                     # Histórico persistente com Geolocalização e Horário
-                    st.session_state.historico.insert(0, {
+                    st.session_state.historico.append({
                         "Hora": get_brasilia_time(),
                         "Alvo": url_input, 
                         "Resultado": res_core['status'],
                         "País": res_core['geo']['pais'], 
                         "Provedor": res_core['geo']['provedor']
                     })
-            
+            else:
                 st.warning("Por favor, insira um dado válido para análise.")
 
 # --- ESTA LINHA (191) DEVE FICAR TOTALMENTE À ESQUERDA, FORA DO IF ---
@@ -203,20 +163,19 @@ with col2:
     st.markdown("### 🕒 Histórico de Análises")
     if st.session_state.historico:
         # Criar o DataFrame e inverter a ordem (Mais recente no topo)
-        df_exibir = pd.DataFrame(st.session_state.historico)
+        df_exibir = pd.DataFrame(st.session_state.historico).iloc[::-1]
 
         # Exibe apenas os últimos 10 registros
         st.dataframe(
-            df_exibir.head(10), # Mostra as 10 últimas análises feitas
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Hora": st.column_config.TextColumn("Hora", width="small"),
-                "Alvo": st.column_config.TextColumn("Alvo", width="medium"),
-                "Resultado": st.column_config.TextColumn("Resultado", width="medium")
-            }
+                df_exibir.head(10), # Mostra as 10 últimas análises feitas
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Hora": st.column_config.TextColumn("Hora", width="small"),
+                    "Alvo": st.column_config.TextColumn("Alvo", width="medium"),
+                    "Resultado": st.column_config.TextColumn("Resultado", width="medium")
+                }
         )
-        
 # --- CENTRAL DE EXPORTAÇÃO MULTIFORMATO ---
     st.markdown("### 📥 Exportar Relatório de Auditoria")
 
