@@ -198,7 +198,7 @@ with col2:
         st.dataframe(
                 df_exibir.head(10), # Mostra as 10 últimas análises feitas
                 use_container_width=True,
-                hide_index=True,
+                hide_index=False,
                 column_config={
                     "Hora": st.column_config.TextColumn("Hora", width="small"),
                     "Alvo": st.column_config.TextColumn("Alvo", width="medium"),
