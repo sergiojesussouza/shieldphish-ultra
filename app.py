@@ -7,6 +7,7 @@ from datetime import datetime
 import pytz  # Necessário: pip install pytz
 from shieldphish_ultra_core import ShieldPhishUltraCore
 import requests
+import time  # <-- Linha corrigida/adicionada
 
 # --- CONFIGURAÇÃO ---
 VT_API_KEY = st.secrets["VT_API_KEY"]
@@ -98,28 +99,22 @@ def consultar_reputacao(alvo):
         return 0
 
 def consultar_urlscan(url):
-    """Realiza a varredura visual e técnica via urlscan.io em modo PRIVADO"""
-    headers = {
-        'API-Key': URLSCAN_API_KEY,
-        'Content-Type': 'application/json'
-    }
+    headers = {'API-Key': URLSCAN_API_KEY, 'Content-Type': 'application/json'}
     data = {"url": url, "visibility": "private"}
     try:
         response = requests.post('https://urlscan.io/api/v1/scan/', headers=headers, json=data)
         if response.status_code == 200:
             res_json = response.json()
             uuid = res_json.get('uuid')
-            # Extraindo o IP que a API detectou durante o scan
-            ip_scan = res_json.get('api', {}).split('/')[-1] if 'api' in res_json else "Não detectado"
-            
+            # Captura o IP de forma estável no campo 'address'
+            ip_scan = res_json.get('address', "Não detectado") 
             return {
                 "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
                 "report": f"https://urlscan.io/result/{uuid}/",
-                "ip": ip_scan # <--- NOVO DADO
+                "ip": ip_scan
             }
     except:
         return None
-    return None
 
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---
 with st.sidebar:
@@ -160,27 +155,22 @@ with aba_links:
         if btn_analise:
             if url_input:
                 with st.spinner('Consultando inteligência artificial e bases globais...'):
-                    # PRIMEIRO: Consulte o VirusTotal para criar a variável 'maliciosos'
+                    # 1. Consultas Únicas (Removida a duplicidade das suas linhas 159 e 166)
                     maliciosos = consultar_reputacao(url_input)
                     idade = obter_idade_dominio(url_input)
-
-                    # DEPOIS: Use o valor de 'maliciosos' na análise da IA
                     res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
                     
-                    # 2. Motor VT Universal e Idade do Domínio
-                    maliciosos = consultar_reputacao(url_input)
-                    idade = obter_idade_dominio(url_input)
-                    
-                    # Exibição do Veredito Dinâmico
+                    # 2. Veredito e Banner de Exfiltração
                     st.markdown(f"### Veredito: :{res_core['color']}[{res_core['status']}]")
-                    
-                    # Métricas em colunas para leitura rápida
+                    if res_core['score'] == "100.0%":
+                        st.error("🚨 **EXFILTRAÇÃO DETECTADA:** Dados direcionados para servidor externo suspeito.")
+
+                    # Métricas
                     m1, m2, m3 = st.columns(3)
                     m1.metric("Score de Risco", res_core['score'])
                     m2.metric("Confiança IA", res_core['detalhes']['ia'])
                     m3.metric("Ameaças (VT)", f"{maliciosos} alertas")
 
-                    # --- NOVO: EXIBIÇÃO DE GEOLOCALIZAÇÃO E INFRAESTRUTURA ---
                     st.markdown("---")
                     g1, g2 = st.columns(2)
                     with g1:
@@ -188,27 +178,31 @@ with aba_links:
                         if res_core['geo']['bandeira']:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
-
-                    # --- EXIBIÇÃO VISUAL (URLSCAN) ---
-                    with st.spinner('Gerando Raio-X Visual...'):
-                        dados_visual = consultar_urlscan(url_input)
-                        if dados_visual:
-                            st.markdown("---")
-                            st.subheader("📸 Evidência Visual (Sandbox)")
-                            
-                            # EXIBIÇÃO DO IP DETECTADO (NOVO)
-                            st.warning(f"🌐 **IP Detectado no Scan:** {dados_visual['ip']}")
-                            
-                            # Exibe a imagem capturada pelo urlscan
-                            st.image(dados_visual['screenshot'], use_container_width=True, caption="Captura em ambiente isolado")
-                            
-                            # Botão para o relatório completo
-                            st.link_button("📄 Ver Relatório Técnico Detalhado", dados_visual['report'])
+                        # Badge de SSL
+                        st.markdown("`[!] SSL RECENTE`" if idade and idade < 7 else "`[✔] SSL ESTÁVEL`")
                     
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
                         st.info(f"{res_core['geo']['provedor']}")
 
+                # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
+                with st.spinner('Iniciando perícia técnica no sandbox...'):
+                    dados_visual = consultar_urlscan(url_input)
+                    if dados_visual:
+                        st.markdown("---")
+                        st.subheader("📸 Evidência Visual (Sandbox)")
+                        
+                        # Exibição do IP detectado no Scan
+                        st.warning(f"🌐 **IP Detectado no Scan:** {dados_visual['ip']}")
+                        
+                        # Espera necessária para a imagem não dar erro "X"
+                        import time
+                        aviso_espera = st.info("⏳ O sandbox está gerando a captura de tela. Aguarde 15 segundos...")
+                        time.sleep(15) 
+                        aviso_espera.empty()
+                        
+                        st.image(dados_visual['screenshot'], use_container_width=True, caption="Captura em ambiente isolado")
+                        st.link_button("📄 Ver Relatório Técnico Detalhado", dados_visual['report'])
 
                     # Alertas de Segurança Específicos
                     if maliciosos > 0:
