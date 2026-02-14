@@ -195,23 +195,24 @@ with aba_links:
                         st.info(f"{res_core['geo']['provedor']}")
 
                 # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
-                with st.spinner('Iniciando perícia técnica no sandbox...'):
+                with st.spinner('Iniciando perícia técnica acessando o site com segurança para você...'):
                     dados_visual = consultar_urlscan(url_input)
                     if dados_visual:
                         st.markdown("---")
-                        st.subheader("📸 Evidência Visual (Sandbox)")
+                        st.subheader("📸 Visualização em Tempo Real")
                         
                         # Exibição do IP detectado no Scan
                         ip_final = res_core['geo'].get('ip') or dados_visual.get('ip')
-                        if ip_final and ip_final != "IP em processamento...":
-                            st.warning(f"🌐 **IP Detectado:** {ip_final}")
+
+                        if ip_identificado and ip_identificado != "IP em processamento...":
+                            st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_identificado}")
                         else:
                             st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
 
                         
                         # Espera necessária para a imagem não dar erro "X"
                         import time
-                        aviso_espera = st.info("⏳ O sandbox está gerando a captura de tela. Aguarde 15 segundos...")
+                        aviso_espera = st.info("⏳ Estamos gerando a captura (foto) do site para sua segurança de tela. Aguarde 15 segundos...")
                         time.sleep(15) 
                         aviso_espera.empty()
                         
