@@ -202,12 +202,17 @@ with aba_links:
                         st.subheader("📸 Evidência Visual (Sandbox)")
                         
                         # Exibição do IP detectado no Scan
-                        st.warning(f"🌐 **IP Detectado no Scan:** {res_core['geo'].get('ip', dados_visual.get('ip'))}")
+                        ip_final = res_core['geo'].get('ip') or dados_visual.get('ip')
+                        if ip_final and ip_final != "IP em processamento...":
+                            st.warning(f"🌐 **IP Detectado:** {ip_final}")
+                        else:
+                            st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
+
                         
                         # Espera necessária para a imagem não dar erro "X"
                         import time
                         aviso_espera = st.info("⏳ O sandbox está gerando a captura de tela. Aguarde 15 segundos...")
-                        time.sleep(25) 
+                        time.sleep(15) 
                         aviso_espera.empty()
                         
                         st.image(dados_visual['screenshot'], use_container_width=True, caption="Captura em ambiente isolado")
