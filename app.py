@@ -202,7 +202,7 @@ with aba_links:
                         st.subheader("📸 Visualização em Tempo Real")
                         
                         # Exibição do IP detectado no Scan
-                        ip_final = res_core['geo'].get('ip') or dados_visual.get('ip')
+                        ip_identificado = res_core['geo'].get('ip') or dados_visual.get('ip')
 
                         if ip_identificado and ip_identificado != "IP em processamento...":
                             st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_identificado}")
