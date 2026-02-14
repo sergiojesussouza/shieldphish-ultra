@@ -195,28 +195,36 @@ with aba_links:
                         st.info(f"{res_core['geo']['provedor']}")
 
                 # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
-                with st.spinner('Iniciando perícia técnica acessando o site com segurança para você...'):
+                with st.spinner('Iniciando perícia técnica acessando o site com segurança...'):
                     dados_visual = consultar_urlscan(url_input)
                     if dados_visual:
                         st.markdown("---")
                         st.subheader("📸 Visualização em Tempo Real")
                         
                         # Exibição do IP detectado no Scan
-                        ip_identificado = res_core['geo'].get('ip') or dados_visual.get('ip')
+                        ip_urlscan = dados_visual.get('ip')
+                        ip_ia = res_core.get('geo', {}).get('ip') # Ajuste conforme sua classe ShieldPhishUltraCore
 
-                        if ip_identificado and ip_identificado != "IP em processamento...":
-                            st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_identificado}")
+                        # Prioridade: IP real do scan > IP da IA
+                        ip_final = None
+                        if ip_urlscan and ip_urlscan != "IP em processamento...":
+                            ip_final = ip_urlscan
+                        elif ip_ia:
+                            ip_final = ip_ia
+
+                        # Exibição do Banner conforme o resultado
+                        if ip_final:
+                            st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_final}")
                         else:
                             st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
 
-                        
                         # Espera necessária para a imagem não dar erro "X"
                         import time
-                        aviso_espera = st.info("⏳ Estamos gerando a captura (foto) do site para sua segurança de tela. Aguarde 15 segundos...")
+                        aviso_espera = st.info("⏳ Estamos gerando a captura do site para sua segurança. Aguarde 15 segundos...")
                         time.sleep(15) 
                         aviso_espera.empty()
                         
-                        st.image(dados_visual['screenshot'], use_container_width=True, caption="Captura em ambiente isolado")
+                        st.image(dados_visual['screenshot'], use_container_width=True, caption="Imagem gerada em ambiente isolado de segurança")
                         st.link_button("📄 Ver Relatório Técnico Detalhado", dados_visual['report'])
 
                     # Alertas de Segurança Específicos
