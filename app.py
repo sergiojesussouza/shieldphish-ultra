@@ -107,20 +107,20 @@ def consultar_urlscan(url):
             res_json = response.json()
             uuid = res_json.get('uuid')
             
-            # TENTATIVA 1: Campo direto de endereço
+            # 1ª tentativa: IP da submissão imediata
             ip_scan = res_json.get('address')
             
-            # TENTATIVA 2: Extração da mensagem de confirmação (mais estável)
+            # 2ª tentativa: Extração da mensagem (como já vínhamos fazendo)
             if not ip_scan:
                 msg = res_json.get('message', "")
                 if "at " in msg:
-                    # Extrai o número após o "at " (ex: 35.201.127.49)
                     ip_scan = msg.split("at ")[-1].split(",")[0].strip()
             
             return {
                 "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
                 "report": f"https://urlscan.io/result/{uuid}/",
-                "ip": ip_scan if ip_scan else "IP em processamento..."
+                "ip": ip_scan if ip_scan else "IP em processamento...",
+                "uuid": uuid # Importante para consultas futuras se necessário
             }
     except:
         return None
@@ -202,7 +202,7 @@ with aba_links:
                         st.subheader("📸 Evidência Visual (Sandbox)")
                         
                         # Exibição do IP detectado no Scan
-                        st.warning(f"🌐 **IP Detectado no Scan:** {res_core['geo'].get('ip', dados_visual.get('ip', 'Identificando...'))}")
+                        st.warning(f"🌐 **IP Detectado no Scan:** {res_core['geo'].get('ip', dados_visual.get('ip'))}")
                         
                         # Espera necessária para a imagem não dar erro "X"
                         import time
