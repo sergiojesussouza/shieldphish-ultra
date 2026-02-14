@@ -106,12 +106,21 @@ def consultar_urlscan(url):
         if response.status_code == 200:
             res_json = response.json()
             uuid = res_json.get('uuid')
-            # Captura o IP de forma estável no campo 'address'
-            ip_scan = res_json.get('address', "Não detectado") 
+            
+            # TENTATIVA 1: Campo direto de endereço
+            ip_scan = res_json.get('address')
+            
+            # TENTATIVA 2: Extração da mensagem de confirmação (mais estável)
+            if not ip_scan:
+                msg = res_json.get('message', "")
+                if "at " in msg:
+                    # Extrai o número após o "at " (ex: 35.201.127.49)
+                    ip_scan = msg.split("at ")[-1].split(",")[0].strip()
+            
             return {
                 "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
                 "report": f"https://urlscan.io/result/{uuid}/",
-                "ip": ip_scan
+                "ip": ip_scan if ip_scan else "IP em processamento..."
             }
     except:
         return None
