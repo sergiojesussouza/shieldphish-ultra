@@ -202,7 +202,7 @@ with aba_links:
                         st.subheader("📸 Evidência Visual (Sandbox)")
                         
                         # Exibição do IP detectado no Scan
-                        st.warning(f"🌐 **IP Detectado no Scan:** {dados_visual['ip']}")
+                        st.warning(f"🌐 **IP Detectado no Scan:** {res_core['geo'].get('ip', dados_visual['ip'])}")
                         
                         # Espera necessária para a imagem não dar erro "X"
                         import time
