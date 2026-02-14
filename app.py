@@ -6,9 +6,11 @@ import pandas as pd
 from datetime import datetime
 import pytz  # Necessário: pip install pytz
 from shieldphish_ultra_core import ShieldPhishUltraCore
+import requests
 
 # --- CONFIGURAÇÃO ---
 VT_API_KEY = st.secrets["VT_API_KEY"]
+URLSCAN_API_KEY = st.secrets["URLSCAN_API_KEY"]
 
 st.set_page_config(page_title="ShieldPhish Ultra", page_icon="🛡️", layout="wide")
 st.markdown("""
@@ -95,6 +97,30 @@ def consultar_reputacao(alvo):
     except:
         return 0
 
+def consultar_urlscan(url):
+    """Realiza a varredura visual e técnica via urlscan.io em modo PRIVADO"""
+    headers = {
+        'API-Key': URLSCAN_API_KEY,
+        'Content-Type': 'application/json'
+    }
+    data = {"url": url, "visibility": "private"}
+    try:
+        response = requests.post('https://urlscan.io/api/v1/scan/', headers=headers, json=data)
+        if response.status_code == 200:
+            res_json = response.json()
+            uuid = res_json.get('uuid')
+            # Extraindo o IP que a API detectou durante o scan
+            ip_scan = res_json.get('api', {}).split('/')[-1] if 'api' in res_json else "Não detectado"
+            
+            return {
+                "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
+                "report": f"https://urlscan.io/result/{uuid}/",
+                "ip": ip_scan # <--- NOVO DADO
+            }
+    except:
+        return None
+    return None
+
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---
 with st.sidebar:
     st.markdown("### Sobre o Sistema")
@@ -162,6 +188,22 @@ with aba_links:
                         if res_core['geo']['bandeira']:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
+
+                    # --- EXIBIÇÃO VISUAL (URLSCAN) ---
+                    with st.spinner('Gerando Raio-X Visual...'):
+                        dados_visual = consultar_urlscan(url_input)
+                        if dados_visual:
+                            st.markdown("---")
+                            st.subheader("📸 Evidência Visual (Sandbox)")
+                            
+                            # EXIBIÇÃO DO IP DETECTADO (NOVO)
+                            st.warning(f"🌐 **IP Detectado no Scan:** {dados_visual['ip']}")
+                            
+                            # Exibe a imagem capturada pelo urlscan
+                            st.image(dados_visual['screenshot'], use_container_width=True, caption="Captura em ambiente isolado")
+                            
+                            # Botão para o relatório completo
+                            st.link_button("📄 Ver Relatório Técnico Detalhado", dados_visual['report'])
                     
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
