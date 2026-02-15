@@ -136,13 +136,22 @@ def consultar_urlscan(url):
         return None
     
 def calcular_idade_certificado(res_core):
-    """Extrai a idade real do SSL/TLS do banco de dados da perícia."""
+    """
+    Extrai a data real de emissão do certificado TLS e calcula a idade.
+    """
     try:
         # Busca a data no formato AAAA-MM-DD (ex: 2025-12-25)
-        data_emissao_str = res_core.get('detalhes', {}).get('cert_emissao', '')
+        data_str = res_core.get('detalhes', {}).get('cert_emissao', '')
         
-        if data_emissao_str:
-            data_emissao = datetime.strptime(data_emissao_str, "%Y-%m-%d")
+        # 2. Backup: Busca na estrutura bruta do urlscan (Crucial para o amtso.org)
+        if not data_str:
+            certs = res_core.get('lists', {}).get('certificates', [])
+            if certs:
+                # O urlscan entrega a data como '2025-12-25T...
+                data_str = certs[0].get('validFrom', '')[:10]
+
+        if data_str:
+            data_emissao = datetime.strptime(data_str, "%Y-%m-%d")
             dias = (datetime.now() - data_emissao).days
             return dias
         return None
