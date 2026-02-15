@@ -134,6 +134,20 @@ def consultar_urlscan(url):
             }
     except:
         return None
+    
+def calcular_idade_certificado(res_core):
+    """Extrai a idade real do SSL/TLS do banco de dados da perícia."""
+    try:
+        # Busca a data no formato AAAA-MM-DD (ex: 2025-12-25)
+        data_emissao_str = res_core.get('detalhes', {}).get('cert_emissao', '')
+        
+        if data_emissao_str:
+            data_emissao = datetime.strptime(data_emissao_str, "%Y-%m-%d")
+            dias = (datetime.now() - data_emissao).days
+            return dias
+        return None
+    except:
+        return None
 
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---
 with st.sidebar:
@@ -178,12 +192,9 @@ with aba_links:
                     maliciosos = consultar_reputacao(url_input)
                     idade = obter_idade_dominio(url_input)
 
-                    try:
-                        cert_idade = 1
-                    except:
-                        cert_idade = None
-
                     res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
+
+                    cert_idade = calcular_idade_certificado(res_core)
                     
                     # 2. Veredito e Banner de Exfiltração
                     st.markdown(f"### Veredito: :{res_core['color']}[{res_core['status']}]")
@@ -241,14 +252,14 @@ with aba_links:
                         total = dados_visual.get('total_scans', '0')
 
                         # BANNER AMARELO DINÂMICO (Informação do urlscan.io)
-                        st.warning(f"🌐 O endereço **{dominio_limpo}** foi analisado **{total} vezes** no urlscan.io.")
+                        st.warning(f"🌐 O endereço {dominio_limpo} foi analisado **{total} vezes** no urlscan.io.")
 
                         # Exibição do IP (Banner Secundário se detectado)
                         ip_final = dados_visual.get('ip')
                         if ip_final and ip_final != "IP em processamento...":
                             st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_final}")
                         else:
-                            st.info("🌐 Imagem gerada em ambiente isolado de segurança")
+                            st.info("🔐 Imagem gerada em ambiente isolado de segurança")
 
                         # Espera necessária para a imagem não dar erro "X"
                         import time
@@ -256,7 +267,7 @@ with aba_links:
                         time.sleep(20) 
                         aviso_espera.empty()
                         
-                        st.image(dados_visual['screenshot'], use_container_width=True, caption="Imagem gerada em ambiente isolado de segurança")
+                        st.image(dados_visual['screenshot'], use_container_width=True, caption="🚫Imagem gerada em ambiente isolado de segurança")
                         st.link_button("📄 Ver Relatório Técnico Detalhado", dados_visual['report'])
 
                     # Alertas de Segurança Específicos
