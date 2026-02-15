@@ -246,28 +246,27 @@ with aba_links:
             m1, m2, m3 = st.columns(3)
             m1.metric("Score de Risco", core['score'])
             
-            # --- LÓGICA REFORMULADA: NÍVEL DE CERTEZA IA ---
+            # --- LÓGICA DE CLAREZA TOTAL (VERSÃO FINAL COM EMOJIS) ---
             try:
-                # Extraímos os valores numéricos para comparação
                 conf_v = float(core['detalhes']['ia'].replace('%', ''))
                 score_v = float(core['score'].replace('%', ''))
             except:
                 conf_v = 0.0
                 score_v = 0.0
             
-            # Definição Dinâmica de Cores e Rótulos baseada no Score de Risco
+            # Aplicação da Tabela Final de Rótulos
             if conf_v >= 80:
-                label, cor_d = "✅ ALTA", "normal"
+                label, cor_d = "✅ ALTA CONFIANÇA", "normal"
             elif conf_v >= 50:
-                label, cor_d = "⚠️ MÉDIA", "off"
+                label, cor_d = "⚠️ VERIFICAR", "off"
             else:
-                # Se a confiança é baixa (< 50%), a cor agora segue o Score de Risco
+                # Fallback para Confiança Baixa (< 50%)
                 if score_v >= 70:
-                    label, cor_d = "🔍 BAIXA (REVISAR)", "inverse" # Vermelho
+                    label, cor_d = "🚨 POSSÍVEL AMEAÇA – REVISAR", "inverse" # Vermelho
                 elif score_v >= 30:
-                    label, cor_d = "🔍 INCONCLUSIVA", "off"       # Cinza/Amarelo
+                    label, cor_d = "⚠️ VERIFICAR", "off"                     # Cinza/Amarelo
                 else:
-                    label, cor_d = "🔍 INSUFICIENTE", "normal"    # Verde/Azul
+                    label, cor_d = "🟢 SEM INDÍCIOS DE AMEAÇA", "normal"    # Verde
 
             m2.metric("Nível de Certeza IA", core['detalhes']['ia'], delta=label, delta_color=cor_d)
             m3.metric("Ameaças (VT)", f"{res['maliciosos']} alertas")
