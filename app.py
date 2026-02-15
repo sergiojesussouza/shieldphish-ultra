@@ -247,7 +247,7 @@ with aba_links:
                         # Badge de SSL com linguagem intuitiva
                         st.markdown(
                             f"`[!]SSL ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" 
-                            if cert_idade is not None and cert_idade > 7 
+                            if cert_idade is not None and cert_idade<7 
                             else f"`[✔]SSl 🛡️SEGURANÇA ESTABELECIDA`" 
                         )
 
