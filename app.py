@@ -213,7 +213,7 @@ with aba_links:
                 cert_idade = calcular_idade_certificado(res_core)
                 dados_visual = consultar_urlscan(url_input)
 
-                # SALVAMOS TUDO NA SESSÃO PARA PERSISTÊNCIA
+                # SALVAMOS TUDO NA SESSÃO PARA PERSISTÊNCIA (100% Corrigido)
                 st.session_state.analise_ativa = {
                     'res_core': res_core,
                     'maliciosos': maliciosos,
@@ -221,8 +221,8 @@ with aba_links:
                     'cert_idade': cert_idade,
                     'dados_visual': dados_visual,
                     'url': url_input,
-                    # Garante que o IP seja salvo para evitar o NameError
-                    'ip_final': res_core['geo'].get('ip') or dados_visual.get('ip') if dados_visual else res_core['geo'].get('ip')
+                    # Salva o IP de forma segura para o código não travar
+                    'ip_final': res_core['geo'].get('ip') or (dados_visual.get('ip') if dados_visual else None)
                 }
 
                 # Atualiza o histórico
@@ -277,28 +277,25 @@ with aba_links:
                 st.info(f"{core['geo']['provedor']}")
 
             # --- 3. BLOCO URLSCAN (EVIDÊNCIA VISUAL) ---
-            if res.get('dados_visual'):
+            if 'analise_ativa' in st.session_state and res.get('dados_visual'):
                 st.markdown("---")
                 st.subheader("📸 Visualização em Tempo Real (Sandbox)")
                 
                 dv = res['dados_visual']
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
-                # 1. RESTAURA O CONTADOR AMARELO (Igual à sua foto de sucesso)
+                # 1. RESTAURA O CONTADOR AMARELO DA FOTO (Ex: analisado 383 vezes)
                 st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
                 
-                # 2. EXIBIÇÃO DO IP (Usando a variável segura da sessão para evitar erros)
-                ip_exibir = res.get('ip_final')
-                if ip_exibir and ip_exibir != "IP em processamento...":
-                    st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_exibir}")
-                else:
-                    st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
-                
-                # 3. SINCRONISMO DA IMAGEM (Para evitar o erro "No Screenshot Available")
-                with st.spinner("⏳ Gerando evidência visual segura..."):
+                # 2. SINCRONISMO: Espera o sandbox concluir a foto para não dar erro "X"
+                with st.spinner("⏳ Capturando evidência visual segura..."):
                     import time
-                    time.sleep(15) # Delay necessário para o servidor processar a foto
+                    time.sleep(15) # Delay essencial para a foto carregar
+                    
+                    # Exibe a Captura de Tela real do URLScan
                     st.image(dv['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado")
+                    
+                    # 3. BOTÃO DE RELATÓRIO TÉCNICO (Puxando os dados da API)
                     st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
 
                 # Alertas de Segurança Específicos
