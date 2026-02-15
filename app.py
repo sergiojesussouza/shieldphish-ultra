@@ -136,32 +136,32 @@ def consultar_urlscan(url):
         return None
     
     def calcular_dias(data_str):
-    try:
-        # Remove horário (T00:00:00Z) e limpa a string para YYYY-MM-DD
-        data_limpa = data_str.split("T")[0]
-        data_emissao = datetime.strptime(data_limpa, "%Y-%m-%d")
-        return (datetime.now() - data_emissao).days
-    except:
-        return None
+        try:
+            # Remove horário (T00:00:00Z) e limpa a string
+            data_limpa = data_str.split("T")[0]
+            data_emissao = datetime.strptime(data_limpa, "%Y-%m-%d")
+            return (datetime.now() - data_emissao).days
+        except:
+            return None
     
-def calcular_idade_certificado(res_core):
-    try:
-        # Busca segura na lista de certificados do urlscan
-        certs = res_core.get('lists', {}).get('certificates', [])
-        if certs:
-            data_str = certs[0].get('validFrom')
-            if data_str:
-                return calcular_dias(data_str)
-        # Formato 2 – Busca nos dados da página (Backup)
-        cert_page = res_core.get('page', {}).get('certificate', {})
-        if cert_page:
-            data_str = cert_page.get('validFrom')
-            if data_str:
-                return calcular_dias(data_str)
-            
-        return None
-    except Exception:
-        return None
+    def calcular_idade_certificado(res_core):
+        try:
+            # Busca segura na lista de certificados do urlscan
+            certs = res_core.get('lists', {}).get('certificates', [])
+            if certs:
+                data_str = certs[0].get('validFrom')
+                if data_str:
+                    return calcular_dias(data_str)
+            # Formato 2 – Busca nos dados da página (Backup)
+            cert_page = res_core.get('page', {}).get('certificate', {})
+            if cert_page:
+                data_str = cert_page.get('validFrom')
+                if data_str:
+                    return calcular_dias(data_str)
+                
+            return None
+        except Exception:
+            return None
 
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---
 with st.sidebar:
