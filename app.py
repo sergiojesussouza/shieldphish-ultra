@@ -182,7 +182,7 @@ with aba_links:
                         cert_idade = 1
                     except:
                         cert_idade = None
-                        
+
                     res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
                     
                     # 2. Veredito e Banner de Exfiltração
@@ -223,7 +223,7 @@ with aba_links:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
                         # Badge de SSL com linguagem intuitiva
-                        st.markdown(f"`[!] ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade and cert_idade < 7 else f"`[✔] 🛡️SEGURANÇA ESTABELECIDA`" )
+                        st.markdown(f"`[!]SSL ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade and cert_idade < 7 else f"`[✔]SSl 🛡️SEGURANÇA ESTABELECIDA`" )
 
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
@@ -252,8 +252,8 @@ with aba_links:
 
                         # Espera necessária para a imagem não dar erro "X"
                         import time
-                        aviso_espera = st.info("⏳ Estamos gerando a captura do site para sua segurança. Aguarde 15 segundos...")
-                        time.sleep(15) 
+                        aviso_espera = st.info("⏳ Estamos gerando a captura do site para sua segurança. Aguarde 20 segundos...")
+                        time.sleep(20) 
                         aviso_espera.empty()
                         
                         st.image(dados_visual['screenshot'], use_container_width=True, caption="Imagem gerada em ambiente isolado de segurança")
