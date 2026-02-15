@@ -146,24 +146,18 @@ def calcular_dias(data_str):
         return None
 
 def calcular_idade_certificado(res_core):
-    """Busca o campo TLS certificate no relatório bruto do urlscan."""
     try:
-        # O urlscan armazena o certificado em lists -> certificates
+        # Busca a data bruta de emissão no campo técnico do certificado
         certs = res_core.get('lists', {}).get('certificates', [])
         if certs:
-            data_str = certs[0].get('validFrom')
+            data_str = certs[0].get('validFrom', '')[:10] 
             if data_str:
-                return calcular_dias(data_str)
-            
-        # Formato 2 – Busca nos dados da página (Backup)
-        cert_page = res_core.get('page', {}).get('certificate', {})
-        if cert_page:
-            data_str = cert_page.get('validFrom')
-            if data_str:
-                return calcular_dias(data_str)
-            
+                from datetime import datetime
+                data_emissao = datetime.strptime(data_str, "%Y-%m-%d")
+                # Calcula a diferença entre HOJE (15/02/2026) e a data do TLS
+                return (datetime.now() - data_emissao).days
         return None
-    except Exception:
+    except:
         return None
 
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---
