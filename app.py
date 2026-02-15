@@ -174,9 +174,15 @@ with aba_links:
         if btn_analise:
             if url_input:
                 with st.spinner('Consultando inteligência artificial e bases globais...'):
-                    # 1. Consultas Únicas (Removida a duplicidade das suas linhas 159 e 166)
+                    # 1. Consultas Iniciais
                     maliciosos = consultar_reputacao(url_input)
                     idade = obter_idade_dominio(url_input)
+
+                    try:
+                        cert_idade = 1
+                    except:
+                        cert_idade = None
+                        
                     res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
                     
                     # 2. Veredito e Banner de Exfiltração
