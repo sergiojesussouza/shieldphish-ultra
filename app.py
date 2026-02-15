@@ -256,7 +256,7 @@ with aba_links:
             
             # Aplicação da Tabela Final de Rótulos
             if conf_v >= 80:
-                label, cor_d = "✅ ALTA CONFIANÇA", "normal"
+                label, cor_d = "✅ ALTA", "normal"
             elif conf_v >= 50:
                 label, cor_d = "⚠️ VERIFICAR", "off"
             else:
