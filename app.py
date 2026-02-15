@@ -147,20 +147,18 @@ def calcular_dias(data_str):
 
 def calcular_idade_certificado(res_core):
     try:
-        certs = res_core.get('lists', {}).get('certificates', [])
-        if certs:
-            data_str = certs[0].get('validFrom', '')[:10] 
-            if data_str:
-                # Converte a string para data
-                data_emissao = datetime.strptime(data_str, "%Y-%m-%d")
-                # Pega a data de hoje sem informações de fuso para comparar
-                hoje = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-                
-                idade = (hoje - data_emissao).days
-                return idade
+        data_bruta = res_core.get('ssl_date') # Ele agora vai achar essa chave!
+        if data_bruta:
+            from datetime import datetime
+            # O SSL retorna: "Feb 13 00:00:00 2026 GMT"
+            # Pegamos as primeiras 4 partes: "Feb 13 00:00:00 2026"
+            data_limpa = " ".join(data_bruta.split()[:4])
+            data_emissao = datetime.strptime(data_limpa, "%b %d %H:%M:%S %Y")
+            
+            hoje = datetime.now()
+            return (hoje - data_emissao).days
         return None
-    except Exception as e:
-        print(f"Erro no cálculo do SSL: {e}")
+    except:
         return None
 
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---

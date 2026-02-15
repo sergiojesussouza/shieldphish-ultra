@@ -1,4 +1,5 @@
 import socket
+import ssl
 import requests
 import pandas as pd
 import math
@@ -88,6 +89,19 @@ class ShieldPhishUltraCore:
         except:
             pass
 
+        cert_date = None
+        try:
+            # Tenta conexão segura para capturar o certificado
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE # Permite ler mesmo se for suspeito
+            with socket.create_connection((domain, 443), timeout=2) as sock:
+                with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                    cert = ssock.getpeercert()
+                    cert_date = cert.get('notBefore') 
+        except:
+            cert_date = None
+
         # Predição por Inteligência Artificial
         x_input = self.vectorizer.transform([raw_url])
         ia_prob = self.model.predict_proba(x_input)[0][1]
@@ -152,6 +166,7 @@ class ShieldPhishUltraCore:
             "color": color,
             "score": f"{final_score * 100:.1f}%",
             "geo": geo_info, 
+            "ssl_date": cert_date,
             "detalhes": {
                 "ia": f"{confianca_exibida:.2%}", # Métrica de confiança real e calibrada
                 "typo": "Sim" if typo_risk > 0 else "Não",
