@@ -286,7 +286,7 @@ with aba_links:
                 st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
 
                 # 2. LINHA EM AZUL ABAIXO DO CONTADOR (Nova ordem solicitada)
-                st.info("🔐📸 Imagem gerada em ambiente de isolado de segurança")
+                st.info("🔐📸 Imagem gerada em ambiente isolado de segurança")
                 
                 # 3. SINCRONISMO E CAPTURA
                 with st.spinner("⏳ Capturando evidência visual segura..."):
