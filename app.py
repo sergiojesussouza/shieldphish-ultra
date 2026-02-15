@@ -137,21 +137,24 @@ def consultar_urlscan(url):
     
 def calcular_dias(data_str):
     try:
-        # Remove horário (T00:00:00Z) e limpa a string
+        # Limpa o formato '2026-02-13T...' para '2026-02-13'
         data_limpa = data_str.split("T")[0]
         data_emissao = datetime.strptime(data_limpa, "%Y-%m-%d")
+        # Diferença exata entre hoje (15/02) e a emissão (13/02)
         return (datetime.now() - data_emissao).days
     except:
         return None
 
 def calcular_idade_certificado(res_core):
+    """Busca o campo TLS certificate no relatório bruto do urlscan."""
     try:
-        # Busca segura na lista de certificados do urlscan
+        # O urlscan armazena o certificado em lists -> certificates
         certs = res_core.get('lists', {}).get('certificates', [])
         if certs:
             data_str = certs[0].get('validFrom')
             if data_str:
                 return calcular_dias(data_str)
+            
         # Formato 2 – Busca nos dados da página (Backup)
         cert_page = res_core.get('page', {}).get('certificate', {})
         if cert_page:
@@ -245,11 +248,10 @@ with aba_links:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
                         # Badge de SSL com linguagem intuitiva
-                        st.markdown(
-                            f"`[!]SSL ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" 
-                            if cert_idade is not None and cert_idade<7 
-                            else f"`[✔]SSl 🛡️SEGURANÇA ESTABELECIDA`" 
-                        )
+                        if cert_idade is not None and cert_idade < 7:
+                            st.markdown(f"`[!]SSL ⚠️ SEGURANÇA RECENTE ({cert_idade} dias)`")
+                        else:
+                            st.markdown("`[✔]SSL 🛡️ SEGURANÇA ESTABELECIDA`" )
 
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
