@@ -136,21 +136,17 @@ def consultar_urlscan(url):
         return None
     
 def calcular_idade_certificado(res_core):
-    """Extrai a idade real do certificado TLS do relatório da perícia."""
     try:
-        # Busca a data bruta de emissão no campo 'validFrom' do certificado
-        # O urlscan entrega isso em lists -> certificates
+        # Busca segura na lista de certificados do urlscan
         certs = res_core.get('lists', {}).get('certificates', [])
         if certs:
-            # Captura os primeiros 10 caracteres (AAAA-MM-DD)
+            # Captura a data de emissão real (validFrom)
             data_str = certs[0].get('validFrom', '')[:10] 
             if data_str:
-                from datetime import datetime
                 data_emissao = datetime.strptime(data_str, "%Y-%m-%d")
-                dias = (datetime.now() - data_emissao).days
-                return dias
+                return (datetime.now() - data_emissao).days
         return None
-    except:
+    except Exception as e:
         return None
 
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---
@@ -235,7 +231,7 @@ with aba_links:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
                         # Badge de SSL com linguagem intuitiva
-                        st.markdown(f"`[!]SSL ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade and cert_idade < 7 else f"`[✔]SSl 🛡️SEGURANÇA ESTABELECIDA`" )
+                        st.markdown(f"`[!]SSL ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade is not None and cert_idade < 7 else f"`[✔]SSl 🛡️SEGURANÇA ESTABELECIDA`" )
 
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
