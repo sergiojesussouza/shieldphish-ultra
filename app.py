@@ -160,7 +160,7 @@ with aba_links:
         st.subheader("Insira o link para análise:") 
         
         # Campo Versátil: Agora aceita URL, IP, Domínio ou Hash
-        url_input = st.text_input("Busca Global (URL, IP, Domínio ou Hash):", 
+        url_input = st.text_input("📍 Alvo da Perícia (URL, IP, Domínio ou Hash):", 
                                  placeholder="Ex: 8.8.8.8, www.site.com.br, ou hash do arquivo...")
         
         c_btn1, c_btn2 = st.columns(2)
@@ -184,25 +184,44 @@ with aba_links:
                     if res_core['score'] == "100.0%":
                         st.error("🚨 **EXFILTRAÇÃO DETECTADA:** Dados direcionados para servidor externo suspeito.")
 
-                    # Métricas
+                    # --- NÚCLEO DE MÉTRICAS DINÂMICAS ---
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Score de Risco", res_core['score'])
-                    m2.metric("Confiança IA", res_core['detalhes']['ia'])
-                    m3.metric("Ameaças (VT)", f"{maliciosos} alertas")
 
-                    st.markdown("---")
-                    g1, g2 = st.columns(2)
-                    with g1:
-                        st.markdown("**📍 Localização do Servidor**")
-                        if res_core['geo']['bandeira']:
-                            st.image(res_core['geo']['bandeira'], width=35)
-                        st.text(f"País: {res_core['geo']['pais']}")
-                        # Badge de SSL
-                        st.markdown("`[!] SSL RECENTE`" if idade and idade < 7 else "`[✔] SSL ESTÁVEL`")
-                    
-                    with g2:
-                        st.markdown("**🏢 Infraestrutura (ASN)**")
-                        st.info(f"{res_core['geo']['provedor']}")
+                    # 1. Conversão e Lógica de Relacionamento (Veredito vs. Confiança)
+                    try:
+                        confianca_valor = float(res_core['detalhes']['ia'].replace('%', ''))
+                        except:
+                            confianca_valor = 0.0
+                        
+                    if confianca_valor >= 80:
+                        label_ia = "✅ ALTA CERTEZA"
+                        cor_delta = "normal"  # Verde
+                        elif confianca_valor >= 50:
+                            label_ia = "⚠️ MÉDIA (ANALISANDO)"
+                            cor_delta = "off"     # Cinza
+                        else:
+                            label_ia = "🔍 BAIXA (DADOS INSUFICIENTES)"
+                            cor_delta = "inverse" # Vermelho/Alerta
+                        
+                        # 2. Exibição das Métricas
+                        m1.metric("Score de Risco", res_core['score'])
+                        m2.metric("Confiança IA", res_core['detalhes']['ia'], delta=label_ia, delta_color=cor_delta)
+                        m3.metric("Ameaças (VT)", f"{maliciosos} alertas")
+
+                        st.markdown("---")
+
+                        # 3. Localização e Infraestrutura
+                        g1, g2 = st.columns(2)
+                        with g1:
+                            st.markdown("**📍 Localização do Servidor**")
+                            if res_core['geo']['bandeira']:
+                                st.image(res_core['geo']['bandeira'], width=35)
+                            st.text(f"País: {res_core['geo']['pais']}")
+                            st.markdown("`[!] SSL RECENTE`" if idade and idade < 7 else "`[✔] SSL ESTÁVEL`")
+
+                        with g2:
+                            st.markdown("**🏢 Infraestrutura (ASN)**")
+                            st.info(f"{res_core['geo']['provedor']}")
 
                 # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
                 with st.spinner('Iniciando perícia técnica em ambiente isolado de segurança...'):
@@ -216,7 +235,7 @@ with aba_links:
                         total = dados_visual.get('total_scans', '0')
 
                         # BANNER AMARELO DINÂMICO (Informação do urlscan.io)
-                        st.warning(f"🌐 O site **{dominio_limpo}** foi analisado **{total} vezes** no urlscan.io.")
+                        st.warning(f"🌐 O endereço **{dominio_limpo}** foi analisado **{total} vezes** no urlscan.io.")
 
                         # Exibição do IP (Banner Secundário se detectado)
                         ip_final = dados_visual.get('ip')
