@@ -147,17 +147,20 @@ def calcular_dias(data_str):
 
 def calcular_idade_certificado(res_core):
     try:
-        # Busca a data bruta de emissão no campo técnico do certificado
         certs = res_core.get('lists', {}).get('certificates', [])
         if certs:
             data_str = certs[0].get('validFrom', '')[:10] 
             if data_str:
-                from datetime import datetime
+                # Converte a string para data
                 data_emissao = datetime.strptime(data_str, "%Y-%m-%d")
-                # Calcula a diferença entre HOJE (15/02/2026) e a data do TLS
-                return (datetime.now() - data_emissao).days
+                # Pega a data de hoje sem informações de fuso para comparar
+                hoje = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                
+                idade = (hoje - data_emissao).days
+                return idade
         return None
-    except:
+    except Exception as e:
+        print(f"Erro no cálculo do SSL: {e}")
         return None
 
 # --- INTERFACE (BARRA LATERAL SEM ALTERAÇÃO) ---
@@ -242,11 +245,17 @@ with aba_links:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
 
-                        # 1. Primeiro, definimos a mensagem baseada na idade real do TLS
-                        texto_ssl = f"`[!]SSL ⚠️ SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade is not None and cert_idade < 7 else "`[✔]SSL 🛡️ SEGURANÇA ESTABELECIDA`"
-                        # 2. Depois, exibimos o resultado final sem erros de sintaxe
-                        st.markdown(texto_ssl)
+                    # --- LOGICA DE VALIDAÇÃO DO SSL CORRIGIDA ---
+                    if cert_idade is not None:
+                        if cert_idade < 7:
+                            texto_ssl = f"`[!]SSL ⚠️ SEGURANÇA RECENTE ({cert_idade} dias)`"
+                        else:
+                            texto_ssl = "`[✔]SSL 🛡️ SEGURANÇA ESTABELECIDA`"
+                    else:
+                        texto_ssl = "`[?]SSL 🔍 AGUARDANDO VALIDAÇÃO...`"
 
+                    st.markdown(texto_ssl)
+                    
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
                         st.info(f"{res_core['geo']['provedor']}")
