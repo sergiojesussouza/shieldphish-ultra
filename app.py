@@ -284,30 +284,32 @@ with aba_links:
                 dv = res['dados_visual']
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
-                # 1. LINHA EM AZUL (Solicitada agora)
-                st.info("🔐📸 Imagem gerada em ambiente de isolado de segurança")
-
-                # 2. CONTADOR AMARELO (Restaurado)
+                # 1. CONTADOR AMARELO NO TOPO (Igual à foto solicitada)
                 st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
+
+                # 2. LINHA EM AZUL ABAIXO DO CONTADOR (Nova ordem solicitada)
+                st.info("🔐📸 Imagem gerada em ambiente de isolado de segurança")
                 
                 # 3. SINCRONISMO E CAPTURA
                 with st.spinner("⏳ Capturando evidência visual segura..."):
                     import time
                     time.sleep(15) # Delay essencial para carregar a foto real
                     
-                    # 4. EXIBIÇÃO DA FOTO COM LEGENDA ALTERADA (Solicitada agora)
+                    # 4. EXIBIÇÃO DA FOTO COM NOVA LEGENDA
                     st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura gerada em ambiente de isolado de segurança")
                     
                     # 5. BOTÃO DE RELATÓRIO TÉCNICO
                     st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
 
                 # Alertas de Segurança Específicos
-                if maliciosos > 0:
-                    st.error(f"🚨 **VirusTotal:** {maliciosos} motores detectaram ameaças neste item.")
-                if res_core['detalhes']['homo']:
+                if res['maliciosos'] > 0:
+                    st.error(f"🚨 **VirusTotal:** {res['maliciosos']} motores detectaram ameaças neste item.")
+                
+                if res['res_core']['detalhes']['homo']:
                     st.error("⚠️ **Ataque Homográfico!** Detectado uso de caracteres visuais falsos.")
-                if idade and idade < 30:
-                    st.warning(f"⏳ **Domínio Recente:** Criado há apenas {idade} dias.")
+                
+                if res['idade'] and res['idade'] < 30:
+                    st.warning(f"⏳ **Domínio Recente:** Criado há apenas {res['idade']} dias.")
 
                     # Histórico persistente com Geolocalização e Horário
                     st.session_state.historico.append({
