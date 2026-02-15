@@ -284,18 +284,21 @@ with aba_links:
                 dv = res['dados_visual']
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
-                # 1. RESTAURA O CONTADOR AMARELO (Ex: analisado 383 vezes)
+                # 1. LINHA EM AZUL (Solicitada agora)
+                st.info("🔐📸 Imagem gerada em ambiente de isolado de segurança")
+
+                # 2. CONTADOR AMARELO (Restaurado)
                 st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
                 
-                # 2. SINCRONISMO DA IMAGEM: Tempo para o site carregar a foto real
+                # 3. SINCRONISMO E CAPTURA
                 with st.spinner("⏳ Capturando evidência visual segura..."):
                     import time
-                    time.sleep(15) # Delay essencial para a foto não vir cinza
+                    time.sleep(15) # Delay essencial para carregar a foto real
                     
-                    # Exibe a Captura de Tela do site (Igual à image_ff0747)
-                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura realizada via URLScan.io")
+                    # 4. EXIBIÇÃO DA FOTO COM LEGENDA ALTERADA (Solicitada agora)
+                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura gerada em ambiente de isolado de segurança")
                     
-                    # 3. BOTÃO DE RELATÓRIO TÉCNICO (UUID Corrigido)
+                    # 5. BOTÃO DE RELATÓRIO TÉCNICO
                     st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
 
                 # Alertas de Segurança Específicos
