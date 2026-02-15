@@ -242,9 +242,10 @@ with aba_links:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
 
-                        # Badge de SSL com linguagem intuitiva
-                        msg_ssl = f"`[!]SSL ⚠️ SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade is not None and cert_idade < 7 else "`[✔]SSL 🛡️ SEGURANÇA ESTABELECIDA`"
-                        st.markdown(msg_ssl)
+                        # 1. Primeiro, definimos a mensagem baseada na idade real do TLS
+                        texto_ssl = f"`[!]SSL ⚠️ SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade is not None and cert_idade < 7 else "`[✔]SSL 🛡️ SEGURANÇA ESTABELECIDA`"
+                        # 2. Depois, exibimos o resultado final sem erros de sintaxe
+                        st.markdown(texto_ssl)
 
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
