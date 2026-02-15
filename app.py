@@ -104,7 +104,7 @@ def consultar_urlscan(url):
 
     try:
         # 1. Inicia o Scan Privado
-        data = {"url": url, "visibility": "private"}
+        data = {"url": url, "visibility": "public"}
         response = requests.post('https://urlscan.io/api/v1/scan/', headers=headers, json=data)
 
         if response.status_code == 200:
@@ -284,18 +284,18 @@ with aba_links:
                 dv = res['dados_visual']
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
-                # 1. RESTAURA O CONTADOR AMARELO DA FOTO (Ex: analisado 383 vezes)
+                # 1. RESTAURA O CONTADOR AMARELO (Ex: analisado 383 vezes)
                 st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
                 
-                # 2. SINCRONISMO: Espera o sandbox concluir a foto para não dar erro "X"
+                # 2. SINCRONISMO DA IMAGEM: Tempo para o site carregar a foto real
                 with st.spinner("⏳ Capturando evidência visual segura..."):
                     import time
-                    time.sleep(15) # Delay essencial para a foto carregar
+                    time.sleep(15) # Delay essencial para a foto não vir cinza
                     
-                    # Exibe a Captura de Tela real do URLScan
-                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado")
+                    # Exibe a Captura de Tela do site (Igual à image_ff0747)
+                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura realizada via URLScan.io")
                     
-                    # 3. BOTÃO DE RELATÓRIO TÉCNICO (Puxando os dados da API)
+                    # 3. BOTÃO DE RELATÓRIO TÉCNICO (UUID Corrigido)
                     st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
 
                 # Alertas de Segurança Específicos
