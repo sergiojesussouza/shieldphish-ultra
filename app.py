@@ -195,7 +195,7 @@ with aba_links:
                         st.info(f"{res_core['geo']['provedor']}")
 
                 # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
-                with st.spinner('Iniciando perícia técnica acessando o site com segurança...'):
+                with st.spinner('Iniciando perícia técnica em ambiente isolado de segurança..'):
                     dados_visual = consultar_urlscan(url_input)
                     if dados_visual:
                         st.markdown("---")
@@ -314,6 +314,22 @@ with col2:
             """
             html_data = html_styled.encode('utf-8')
             st.download_button("🌐 HTML", data=html_data, file_name="auditoria_links.html", mime='text/html', use_container_width=True)
+
+            # --- BLOCO DE ORIENTAÇÃO DE SEGURANÇA (ABAIXO DOS DOWNLOADS) ---
+        st.markdown("---")
+
+        if 'maliciosos' in locals() and (maliciosos > 0 or res_core['score'] == "100.0%"):
+            st.error("### 🚨 O que fazer com este IP Malicioso?")
+
+            st.markdown("""
+            * **Não forneça dados**: Nunca digite senhas, CPFs ou números de cartões em sites onde o IP foi marcado com alertas vermelhos.
+            * **Feche a aba original**: Se você chegou a este site por um link de SMS ou E-mail, feche a página imediatamente.
+            * **Entenda o risco**: Um IP com muitos alertas significa que esse "endereço digital" já foi usado para hospedar vírus ou roubar informações de outras pessoas.
+            * **A visualização é segura**: Você pode observar a "Foto do Site" aqui no sistema sem perigo, pois ela foi gerada em um ambiente isolado de segurança.
+            """)
+
+            with st.expander("📚 Entenda melhor o termo 'IP'"):
+                st.caption("O IP é o endereço real da máquina que hospeda o site. Quando ele é marcado como malicioso, é porque aquele computador específico já foi pego cometendo crimes digitais.")
 
 # --- ABA 2: E-MAILS & VAZAMENTOS ---
 with aba_e_v:
