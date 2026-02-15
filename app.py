@@ -196,12 +196,12 @@ with aba_links:
                     if confianca_valor >= 80:
                         label_ia = "✅ ALTA CERTEZA"
                         cor_delta = "normal"  # Verde
-                        elif confianca_valor >= 50:
-                            label_ia = "⚠️ MÉDIA (ANALISANDO)"
-                            cor_delta = "off"     # Cinza
-                        else:
-                            label_ia = "🔍 BAIXA (DADOS INSUFICIENTES)"
-                            cor_delta = "inverse" # Vermelho/Alerta
+                    elif confianca_valor >= 50:
+                        label_ia = "⚠️ MÉDIA (ANALISANDO)"
+                        cor_delta = "off"     # Cinza
+                    else:
+                        label_ia = "🔍 BAIXA (DADOS INSUFICIENTES)"
+                        cor_delta = "inverse" # Vermelho/Alerta
                         
                         # 2. Exibição das Métricas
                         m1.metric("Score de Risco", res_core['score'])
