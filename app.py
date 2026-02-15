@@ -267,7 +267,7 @@ with aba_links:
                         time.sleep(20) 
                         aviso_espera.empty()
                         
-                        st.image(dados_visual['screenshot'], use_container_width=True, caption="🔒Imagem gerada em ambiente isolado de segurança")
+                        st.image(dados_visual['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado de segurança")
                         st.link_button("📄 Ver Relatório Técnico Detalhado", dados_visual['report'])
 
                     # Alertas de Segurança Específicos
