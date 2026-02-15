@@ -103,36 +103,34 @@ def consultar_urlscan(url):
     dominio = url.replace("https://", "").replace("http://", "").split("/")[0]
 
     try:
-        # 1. Inicia o Scan Privado
-        data = {"url": url, "visibility": "public"}
+        # 1. PRIMEIRA TENTATIVA: MODO PRIVADO (Sua preferência)
+        data = {"url": url, "visibility": "private"}
         response = requests.post('https://urlscan.io/api/v1/scan/', headers=headers, json=data)
+
+        # 2. SE FALHAR (Cota excedida ou erro), TENTA MODO UNLISTED (Contingência)
+        if response.status_code != 200:
+            data["visibility"] = "unlisted"
+            response = requests.post('https://urlscan.io/api/v1/scan/', headers=headers, json=data)
 
         if response.status_code == 200:
             res_json = response.json()
             uuid = res_json.get('uuid')
-            ip_scan = res_json.get('address')
-
-            # 2. Busca o Histórico Real (Contador de consultas da foto de sucesso)
+            
+            # Busca o Histórico Real (Para o Contador Amarelo)
             search_url = f"https://urlscan.io/api/v1/search/?q=domain:{dominio}"
             search_response = requests.get(search_url, headers=headers)
             total_real = 0
             if search_response.status_code == 200:
                 total_real = search_response.json().get('total', 0)
 
-            # 3. Fallback de IP
-            if not ip_scan:
-                msg = res_json.get('message', "")
-                if "at " in msg:
-                    ip_scan = msg.split("at ")[-1].split(",")[0].strip()
-
             return {
                 "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
                 "report": f"https://urlscan.io/result/{uuid}/",
-                "ip": ip_scan if ip_scan else "IP em processamento...",
                 "uuid": uuid,
                 "total_scans": total_real
             }
-    except:
+        return None
+    except Exception as e:
         return None
     
 def calcular_dias(data_str):
@@ -296,7 +294,7 @@ with aba_links:
                     time.sleep(15) # Delay essencial para carregar a foto real
                     
                     # 4. EXIBIÇÃO DA FOTO COM NOVA LEGENDA
-                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura gerada em ambiente de isolado de segurança")
+                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura gerada em ambiente isolado de segurança")
                     
                     # 5. BOTÃO DE RELATÓRIO TÉCNICO
                     st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
