@@ -205,104 +205,100 @@ with aba_links:
             report_url = f"https://safebrowsing.google.com/safebrowsing/report_phish/?url={url_input}" if url_input else "https://safebrowsing.google.com/safebrowsing/report_phish/"
             st.link_button("🚨 Denunciar ao Google Safe Browsing", report_url)
 
-        if btn_analise:
-            if url_input:
-                with st.spinner('Consultando inteligência artificial e bases globais...'):
-                    maliciosos = consultar_reputacao(url_input)
-                    idade = obter_idade_dominio(url_input)
-                    res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
-                    cert_idade = calcular_idade_certificado(res_core)
-                    
-                    # 2. Veredito e Banner de Exfiltração
-                    st.markdown(f"### Veredito: :{res_core['color']}[{res_core['status']}]")
-                    if res_core['score'] == "100.0%":
-                        st.error("🚨 **EXFILTRAÇÃO DETECTADA:** Dados direcionados para servidor externo suspeito.")
+        if btn_analise and url_input:
+            with st.spinner('Consultando inteligência artificial e bases globais...'):
+                maliciosos = consultar_reputacao(url_input)
+                idade = obter_idade_dominio(url_input)
+                res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
+                cert_idade = calcular_idade_certificado(res_core)
+                dados_visual = consultar_urlscan(url_input)
 
-                    # --- NÚCLEO DE MÉTRICAS DINÂMICAS ---
-                    m1, m2, m3 = st.columns(3)
-                    
-                    try:
-                        confianca_valor = float(res_core['detalhes']['ia'].replace('%', ''))
-                    except:
-                        confianca_valor = 0.0
-                        
-                    if confianca_valor >= 80:
-                        label_ia = "✅ ALTA CERTEZA"
-                        cor_delta = "normal"  # Verde
-                    elif confianca_valor >= 50:
-                        label_ia = "⚠️ MÉDIA (ATENÇÃO)"
-                        cor_delta = "off"     # Cinza
-                    else:
-                        label_ia = "🔍 BAIXA (DADOS INSUFICIENTES)"
-                        cor_delta = "inverse" # Vermelho/Alerta
-                        
-                    # 2. Exibição das Métricas
-                    m1.metric("Score de Risco", res_core['score'])
-                    m2.metric("Confiança IA", res_core['detalhes']['ia'], delta=label_ia, delta_color=cor_delta)
-                    m3.metric("Ameaças (VT)", f"{maliciosos} alertas")
+                # SALVAMOS TUDO NA SESSÃO PARA PERSISTÊNCIA
+                st.session_state.analise_ativa = {
+                    'res_core': res_core,
+                    'maliciosos': maliciosos,
+                    'idade': idade,
+                    'cert_idade': cert_idade,
+                    'dados_visual': dados_visual,
+                    'url': url_input
+                }
 
-                    st.markdown("---")
+                # Atualiza o histórico
+                st.session_state.historico.append({
+                    "Hora": get_brasilia_time(),
+                    "Alvo": url_input, 
+                    "Resultado": res_core['status'],
+                    "País": res_core['geo']['pais'], 
+                    "Provedor": res_core['geo']['provedor']
+                })
 
-                    # 3. Localização e Infraestrutura
-                    g1, g2 = st.columns(2)
-                    with g1:
-                        st.markdown("**📍 Localização do Servidor**")
-                        if res_core['geo']['bandeira']:
-                            st.image(res_core['geo']['bandeira'], width=35)
-                        st.text(f"País: {res_core['geo']['pais']}")
+        # --- 2. EXIBIÇÃO PERSISTENTE (FORA DO IF DO BOTÃO) ---
+        if 'analise_ativa' in st.session_state:
+            res = st.session_state.analise_ativa
+            core = res['res_core']
+            
+            st.markdown(f"### Veredito: :{core['color']}[{core['status']}]")
+            
+            if core['score'] == "100.0%":
+                st.error("🚨 **EXFILTRAÇÃO DETECTADA:** Dados direcionados para servidor externo suspeito.")
 
-                    # --- LOGICA DE VALIDAÇÃO DO SSL CORRIGIDA ---
-                    if cert_idade is not None:
-                        if cert_idade < 7:
-                            texto_ssl = f"`[!]SSL ⚠️ SEGURANÇA RECENTE ({cert_idade} dias)`"
-                        else:
-                            texto_ssl = "`[✔]SSL 🛡️ SEGURANÇA ESTABELECIDA`"
-                    else:
-                        texto_ssl = "`[?]SSL 🔍 AGUARDANDO VALIDAÇÃO...`"
+            # Métricas Dinâmicas
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Score de Risco", core['score'])
+            
+            # Lógica de Confiança IA com Delta
+            try:
+                conf_v = float(core['detalhes']['ia'].replace('%', ''))
+            except:
+                conf_v = 0.0
+            
+            label, cor_d = ("✅ ALTA CERTEZA", "normal") if conf_v >= 80 else ("⚠️ MÉDIA", "off") if conf_v >= 50 else ("🔍 BAIXA", "inverse")
+            m2.metric("Confiança IA", core['detalhes']['ia'], delta=label, delta_color=cor_d)
+            m3.metric("Ameaças (VT)", f"{res['maliciosos']} alertas")
 
-                    st.markdown(texto_ssl)
-                    
-                    with g2:
-                        st.markdown("**🏢 Infraestrutura (ASN)**")
-                        st.info(f"{res_core['geo']['provedor']}")
+            st.markdown("---")
 
-                # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
-                with st.spinner('Iniciando perícia técnica em ambiente isolado de segurança...'):
-                    dados_visual = consultar_urlscan(url_input)
-                    if dados_visual:
-                        st.markdown("---")
-                        st.subheader("📸 Visualização em Tempo Real")
-                        
-                        # Exibição do IP detectado no Scan
-                        dominio_limpo = url_input.replace("https://", "").replace("http://", "").split("/")[0]
-                        total = dados_visual.get('total_scans', '0')
+            # Localização e Infraestrutura
+            g1, g2 = st.columns(2)
+            with g1:
+                st.markdown("**📍 Localização do Servidor**")
+                if core['geo']['bandeira']: 
+                    st.image(core['geo']['bandeira'], width=35)
+                st.text(f"País: {core['geo']['pais']}")
+                
+                if res['cert_idade'] is not None:
+                    txt_ssl = f"`[!]SSL ⚠️ RECENTE ({res['cert_idade']} dias)`" if res['cert_idade'] < 7 else "`[✔]SSL 🛡️ ESTÁVEL`"
+                    st.markdown(txt_ssl)
 
-                        # BANNER AMARELO DINÂMICO (Informação do urlscan.io)
-                        st.warning(f"🌐 O endereço {dominio_limpo} foi analisado **{total} vezes** no urlscan.io.")
+            with g2:
+                st.markdown("**🏢 Infraestrutura (ASN)**")
+                st.info(f"{core['geo']['provedor']}")
 
-                        # Exibição do IP (Banner Secundário se detectado)
-                        ip_final = dados_visual.get('ip')
-                        if ip_final and ip_final != "IP em processamento...":
-                            st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_final}")
-                        else:
-                            st.info("🔐 Imagem gerada em ambiente isolado de segurança")
+            # --- 3. BLOCO URLSCAN (EVIDÊNCIA VISUAL) ---
+            if res['dados_visual']:
+                st.markdown("---")
+                st.subheader("📸 Visualização em Tempo Real (Sandbox)")
+                
+                dv = res['dados_visual']
+                dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
+                
+                # Banner de consultas (Igual ao seu print desejado)
+                st.warning(f"🌐 O endereço {dominio_exibir} foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
+                
+                if dv['ip'] != "IP em processamento...":
+                    st.warning(f"🌐 **Endereço Digital (IP) do Site:** {dv['ip']}")
+                
+                # Exibição da Imagem e Relatório Técnico
+                st.image(dv['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado")
+                st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
 
-                        # Espera necessária para a imagem não dar erro "X"
-                        import time
-                        aviso_espera = st.info("⏳ Estamos gerando a captura do site para sua segurança. Aguarde 20 segundos...")
-                        time.sleep(20) 
-                        aviso_espera.empty()
-                        
-                        st.image(dados_visual['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado de segurança")
-                        st.link_button("📄 Ver Relatório Técnico Detalhado", dados_visual['report'])
-
-                    # Alertas de Segurança Específicos
-                    if maliciosos > 0:
-                        st.error(f"🚨 **VirusTotal:** {maliciosos} motores detectaram ameaças neste item.")
-                    if res_core['detalhes']['homo']:
-                        st.error("⚠️ **Ataque Homográfico!** Detectado uso de caracteres visuais falsos.")
-                    if idade and idade < 30:
-                        st.warning(f"⏳ **Domínio Recente:** Criado há apenas {idade} dias.")
+                # Alertas de Segurança Específicos
+                if maliciosos > 0:
+                    st.error(f"🚨 **VirusTotal:** {maliciosos} motores detectaram ameaças neste item.")
+                if res_core['detalhes']['homo']:
+                    st.error("⚠️ **Ataque Homográfico!** Detectado uso de caracteres visuais falsos.")
+                if idade and idade < 30:
+                    st.warning(f"⏳ **Domínio Recente:** Criado há apenas {idade} dias.")
 
                     # Histórico persistente com Geolocalização e Horário
                     st.session_state.historico.append({
