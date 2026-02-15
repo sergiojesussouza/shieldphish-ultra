@@ -281,18 +281,23 @@ with aba_links:
                 dv = res['dados_visual']
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
-                # Banner de consultas
+                # Banner de consultas (Total de vezes que o site foi visto)
                 st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
                 
-                if dv['ip'] != "IP em processamento...":
-                    st.warning(f"🌐 **Endereço Digital (IP) do Site:** {dv['ip']}")
+                # CORREÇÃO DO NAMEERROR: Definimos a variável IP aqui
+                ip_identificado = core['geo'].get('ip') or dv.get('ip')
+
+                if ip_identificado and ip_identificado != "IP em processamento...":
+                    st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_identificado}")
+                else:
+                    st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
                 
-                # O SEGREDO: Aguardar o servidor gerar a imagem
+                # Captura da imagem com delay de segurança
                 with st.spinner("⏳ Capturando evidência visual segura..."):
-                    time.sleep(15)  # Tempo para o servidor do URLScan criar o .png
+                    import time
+                    time.sleep(15) 
                     st.image(dv['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado")
                     st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
-
                 # Alertas de Segurança Específicos
                 if maliciosos > 0:
                     st.error(f"🚨 **VirusTotal:** {maliciosos} motores detectaram ameaças neste item.")
