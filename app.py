@@ -147,16 +147,24 @@ def calcular_dias(data_str):
 
 def calcular_idade_certificado(res_core):
     try:
-        data_bruta = res_core.get('ssl_date') # Ele agora vai achar essa chave!
+        data_bruta = res_core.get('ssl_date') 
         if data_bruta:
             from datetime import datetime
-            # O SSL retorna: "Feb 13 00:00:00 2026 GMT"
-            # Pegamos as primeiras 4 partes: "Feb 13 00:00:00 2026"
+            import math
+            
+            # 1. Converte a data do SSL (formato: Feb 13 00:00:00 2026 GMT)
             data_limpa = " ".join(data_bruta.split()[:4])
             data_emissao = datetime.strptime(data_limpa, "%b %d %H:%M:%S %Y")
             
+            # 2. Pega o momento exato agora
             hoje = datetime.now()
-            return (hoje - data_emissao).days
+            
+            # 3. Calcula a diferença total em segundos e converte para dias exatos
+            diferenca = hoje - data_emissao
+            dias_reais = diferenca.total_seconds() / 86400  # 86400 segundos em um dia
+            
+            # 4. Usamos math.ceil para que "1 dia e algumas horas" vire "2 dias"
+            return math.ceil(dias_reais)
         return None
     except:
         return None
