@@ -196,7 +196,7 @@ with aba_links:
                         label_ia = "✅ ALTA CERTEZA"
                         cor_delta = "normal"  # Verde
                     elif confianca_valor >= 50:
-                        label_ia = "⚠️ MÉDIA (ANALISANDO)"
+                        label_ia = "⚠️ MÉDIA (ATENÇÃO)"
                         cor_delta = "off"     # Cinza
                     else:
                         label_ia = "🔍 BAIXA (DADOS INSUFICIENTES)"
@@ -216,7 +216,8 @@ with aba_links:
                         if res_core['geo']['bandeira']:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
-                        st.markdown("`[!] SSL RECENTE`" if idade and idade < 7 else "`[✔] SSL ESTÁVEL`")
+                        # Badge de SSL com linguagem intuitiva
+                        st.markdown(f"`[!] SEGURANÇA RECENTE ({idade} dias)`" if idade and idade < 7 else f"`[✔] SEGURANÇA ESTABELECIDA`" )
 
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
