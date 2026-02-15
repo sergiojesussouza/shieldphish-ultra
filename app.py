@@ -220,7 +220,9 @@ with aba_links:
                     'idade': idade,
                     'cert_idade': cert_idade,
                     'dados_visual': dados_visual,
-                    'url': url_input
+                    'url': url_input,
+                    # Garante que o IP seja salvo para evitar o NameError
+                    'ip_final': res_core['geo'].get('ip') or dados_visual.get('ip') if dados_visual else res_core['geo'].get('ip')
                 }
 
                 # Atualiza o histórico
@@ -275,30 +277,30 @@ with aba_links:
                 st.info(f"{core['geo']['provedor']}")
 
             # --- 3. BLOCO URLSCAN (EVIDÊNCIA VISUAL) ---
-            if 'analise_ativa' in st.session_state and res['dados_visual']:
+            if res.get('dados_visual'):
                 st.markdown("---")
                 st.subheader("📸 Visualização em Tempo Real (Sandbox)")
                 
                 dv = res['dados_visual']
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
-                # Banner de consultas (Igual à foto de sucesso: "analisado 383 vezes")
+                # 1. RESTAURA O CONTADOR AMARELO (Igual à sua foto de sucesso)
                 st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
                 
-                # Exibição do IP prioritário (Corrigindo o NameError)
-                ip_identificado = core['geo'].get('ip') or dv.get('ip')
-                if ip_identificado and ip_identificado != "IP em processamento...":
-                    st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_identificado}")
+                # 2. EXIBIÇÃO DO IP (Usando a variável segura da sessão para evitar erros)
+                ip_exibir = res.get('ip_final')
+                if ip_exibir and ip_exibir != "IP em processamento...":
+                    st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_exibir}")
                 else:
                     st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
                 
-                # SINCRONISMO: Tempo para o servidor gerar o arquivo da imagem
-                with st.spinner("⏳ Capturando evidência visual segura..."):
+                # 3. SINCRONISMO DA IMAGEM (Para evitar o erro "No Screenshot Available")
+                with st.spinner("⏳ Gerando evidência visual segura..."):
                     import time
-                    time.sleep(15) # Tempo essencial para evitar o erro "No Screenshot Available"
+                    time.sleep(15) # Delay necessário para o servidor processar a foto
                     st.image(dv['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado")
                     st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
-                    
+
                 # Alertas de Segurança Específicos
                 if maliciosos > 0:
                     st.error(f"🚨 **VirusTotal:** {maliciosos} motores detectaram ameaças neste item.")
