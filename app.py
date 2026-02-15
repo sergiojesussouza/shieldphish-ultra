@@ -205,7 +205,7 @@ with aba_links:
                         
                         # Exibição do IP detectado no Scan
                         dominio_limpo = url_input.replace("https://", "").replace("http://", "").split("/")[0]
-                        total = dados_visual.get('total_scans', 'várias')
+                        total = dados_visual.get('total_scans', '0')
 
                         # BANNER AMARELO DINÂMICO (Informação do urlscan.io)
                         st.warning(f"🌐 O site **{dominio_limpo}** foi analisado **{total} vezes** no urlscan.io.")
@@ -215,7 +215,7 @@ with aba_links:
                         if ip_final and ip_final != "IP em processamento...":
                             st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_final}")
                         else:
-                            st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
+                            st.info("🌐 **Imagem gerada em ambiente isolado de segurança")
 
                         # Espera necessária para a imagem não dar erro "X"
                         import time
