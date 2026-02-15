@@ -246,14 +246,30 @@ with aba_links:
             m1, m2, m3 = st.columns(3)
             m1.metric("Score de Risco", core['score'])
             
-            # Lógica de Confiança IA com Delta
+            # --- LÓGICA REFORMULADA: NÍVEL DE CERTEZA IA ---
             try:
+                # Extraímos os valores numéricos para comparação
                 conf_v = float(core['detalhes']['ia'].replace('%', ''))
+                score_v = float(core['score'].replace('%', ''))
             except:
                 conf_v = 0.0
+                score_v = 0.0
             
-            label, cor_d = ("✅ ALTA CERTEZA", "normal") if conf_v >= 80 else ("⚠️ MÉDIA", "off") if conf_v >= 50 else ("🔍 BAIXA", "inverse")
-            m2.metric("Confiança IA", core['detalhes']['ia'], delta=label, delta_color=cor_d)
+            # Definição Dinâmica de Cores e Rótulos baseada no Score de Risco
+            if conf_v >= 80:
+                label, cor_d = "✅ ALTA", "normal"
+            elif conf_v >= 50:
+                label, cor_d = "⚠️ MÉDIA", "off"
+            else:
+                # Se a confiança é baixa (< 50%), a cor agora segue o Score de Risco
+                if score_v >= 70:
+                    label, cor_d = "🔍 BAIXA (REVISAR)", "inverse" # Vermelho
+                elif score_v >= 30:
+                    label, cor_d = "🔍 INCONCLUSIVA", "off"       # Cinza/Amarelo
+                else:
+                    label, cor_d = "🔍 INSUFICIENTE", "normal"    # Verde/Azul
+
+            m2.metric("Nível de Certeza IA", core['detalhes']['ia'], delta=label, delta_color=cor_d)
             m3.metric("Ameaças (VT)", f"{res['maliciosos']} alertas")
 
             st.markdown("---")
@@ -283,10 +299,10 @@ with aba_links:
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
                 # 1. CONTADOR AMARELO NO TOPO (Igual à foto solicitada)
-                st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
+                st.warning(f"🌐 O endereço {dominio_exibir}  foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
 
                 # 2. LINHA EM AZUL ABAIXO DO CONTADOR (Nova ordem solicitada)
-                st.info("🔐📸 Imagem gerada em ambiente isolado de segurança")
+                st.info("📸🔐 Imagem gerada em ambiente isolado de segurança.")
                 
                 # 3. SINCRONISMO E CAPTURA
                 with st.spinner("⏳ Capturando evidência visual segura..."):
