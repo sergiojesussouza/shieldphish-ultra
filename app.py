@@ -231,7 +231,12 @@ with aba_links:
                             st.image(res_core['geo']['bandeira'], width=35)
                         st.text(f"País: {res_core['geo']['pais']}")
                         # Badge de SSL com linguagem intuitiva
-                        st.markdown(f"`[!]SSL ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" if cert_idade is not None and cert_idade < 7 else f"`[✔]SSl 🛡️SEGURANÇA ESTABELECIDA`" )
+                        st.markdown(f"`[!]SSL ⚠️SEGURANÇA RECENTE ({cert_idade} dias)`" 
+                                    if cert_idade is not None and cert_idade < 7 
+                                    else f"`[✔]SSl 🛡️SEGURANÇA ESTABELECIDA`" 
+                        )
+
+                    st.write("DEBUG cert_idade:", cert_idade)
 
                     with g2:
                         st.markdown("**🏢 Infraestrutura (ASN)**")
