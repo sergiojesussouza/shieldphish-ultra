@@ -91,14 +91,16 @@ class ShieldPhishUltraCore:
 
         cert_date = None
         try:
-            # Tenta conexão segura para capturar o certificado
             context = ssl.create_default_context()
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE # Permite ler mesmo se for suspeito
+            # Esta linha abaixo ajuda a garantir que o certificado seja retornado
+            context.check_hostname = True 
+            context.verify_mode = ssl.CERT_REQUIRED
+            
             with socket.create_connection((domain, 443), timeout=2) as sock:
                 with context.wrap_socket(sock, server_hostname=domain) as ssock:
                     cert = ssock.getpeercert()
-                    cert_date = cert.get('notBefore') 
+                    # Se o cert for vazio, tentamos buscar a data de outra forma
+                    cert_date = cert.get('notBefore')
         except:
             cert_date = None
 
