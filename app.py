@@ -327,7 +327,7 @@ with col2:
             * **A visualização é segura**: Você pode observar a "Foto do Site" aqui no sistema sem perigo, pois ela foi gerada em um ambiente isolado de segurança.
             """)
 
-            with st.expander("📚 Entenda melhor o termo "IP" "):
+            with st.expander("📚 Entenda melhor o termo IP "):
                 st.caption("O IP é o endereço real da máquina que hospeda o site. Quando ele é marcado como malicioso, é porque aquele computador específico já foi pego cometendo crimes digitais.")
 
 # --- ABA 2: E-MAILS & VAZAMENTOS ---
