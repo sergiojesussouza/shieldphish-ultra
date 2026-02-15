@@ -100,29 +100,37 @@ def consultar_reputacao(alvo):
 
 def consultar_urlscan(url):
     headers = {'API-Key': URLSCAN_API_KEY, 'Content-Type': 'application/json'}
-    data = {"url": url, "visibility": "private"}
+    dominio = url.replace("https://", "").replace("http://", "").split("/")[0]
+
     try:
+        data = {"url": url, "visibility": "private"}
         response = requests.post('https://urlscan.io/api/v1/scan/', headers=headers, json=data)
+
         if response.status_code == 200:
             res_json = response.json()
             uuid = res_json.get('uuid')
-            
-            # 1ª tentativa: IP da submissão imediata
             ip_scan = res_json.get('address')
-            
-            # 2ª tentativa: Extração da mensagem (como já vínhamos fazendo)
+
+            search_url = f"https://urlscan.io/api/v1/search/?q=domain:{dominio}"
+            search_response = requests.get(search_url, headers=headers)
+
+            total_real = "várias"
+            if search_response.status_code == 200:
+                search_json = search_response.json()
+                total_real = search_json.get('total', 'várias')
+
+            # 3. Tratamento do IP
             if not ip_scan:
                 msg = res_json.get('message', "")
                 if "at " in msg:
                     ip_scan = msg.split("at ")[-1].split(",")[0].strip()
-            
+
             return {
                 "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
                 "report": f"https://urlscan.io/result/{uuid}/",
                 "ip": ip_scan if ip_scan else "IP em processamento...",
                 "uuid": uuid,
-                # CAPTURA DINÂMICA: Busca o total de análises no histórico do urlscan
-                "total_scans": res_json.get('stats', {}).get('total', 'várias') 
+                "total_scans": total_real  # Agora traz o número exato do site
             }
     except:
         return None
@@ -215,7 +223,7 @@ with aba_links:
                         if ip_final and ip_final != "IP em processamento...":
                             st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_final}")
                         else:
-                            st.info("🌐 **Imagem gerada em ambiente isolado de segurança")
+                            st.info("🌐 Imagem gerada em ambiente isolado de segurança")
 
                         # Espera necessária para a imagem não dar erro "X"
                         import time
