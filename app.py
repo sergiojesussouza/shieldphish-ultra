@@ -136,24 +136,19 @@ def consultar_urlscan(url):
         return None
     
 def calcular_idade_certificado(res_core):
-    """
-    Extrai a data real de emissão do certificado TLS e calcula a idade.
-    """
+    """Extrai a idade real do certificado TLS do relatório da perícia."""
     try:
-        # Busca a data no formato AAAA-MM-DD (ex: 2025-12-25)
-        data_str = res_core.get('detalhes', {}).get('cert_emissao', '')
-        
-        # 2. Backup: Busca na estrutura bruta do urlscan (Crucial para o amtso.org)
-        if not data_str:
-            certs = res_core.get('lists', {}).get('certificates', [])
-            if certs:
-                # O urlscan entrega a data como '2025-12-25T...
-                data_str = certs[0].get('validFrom', '')[:10]
-
-        if data_str:
-            data_emissao = datetime.strptime(data_str, "%Y-%m-%d")
-            dias = (datetime.now() - data_emissao).days
-            return dias
+        # Busca a data bruta de emissão no campo 'validFrom' do certificado
+        # O urlscan entrega isso em lists -> certificates
+        certs = res_core.get('lists', {}).get('certificates', [])
+        if certs:
+            # Captura os primeiros 10 caracteres (AAAA-MM-DD)
+            data_str = certs[0].get('validFrom', '')[:10] 
+            if data_str:
+                from datetime import datetime
+                data_emissao = datetime.strptime(data_str, "%Y-%m-%d")
+                dias = (datetime.now() - data_emissao).days
+                return dias
         return None
     except:
         return None
@@ -197,12 +192,9 @@ with aba_links:
         if btn_analise:
             if url_input:
                 with st.spinner('Consultando inteligência artificial e bases globais...'):
-                    # 1. Consultas Iniciais
                     maliciosos = consultar_reputacao(url_input)
                     idade = obter_idade_dominio(url_input)
-
                     res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
-
                     cert_idade = calcular_idade_certificado(res_core)
                     
                     # 2. Veredito e Banner de Exfiltração
