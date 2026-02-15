@@ -109,28 +109,27 @@ def consultar_urlscan(url):
         if response.status_code == 200:
             res_json = response.json()
             uuid = res_json.get('uuid')
+            
+            # Tenta pegar o IP direto da resposta
             ip_scan = res_json.get('address')
-
-            search_url = f"https://urlscan.io/api/v1/search/?q=domain:{dominio}"
-            search_response = requests.get(search_url, headers=headers)
-
-            total_real = "várias"
-            if search_response.status_code == 200:
-                search_json = search_response.json()
-                total_real = search_json.get('total', 'várias')
-
-            # 3. Tratamento do IP
             if not ip_scan:
                 msg = res_json.get('message', "")
                 if "at " in msg:
                     ip_scan = msg.split("at ")[-1].split(",")[0].strip()
+
+            # Busca o total de vezes que este domínio foi escaneado
+            search_url = f"https://urlscan.io/api/v1/search/?q=domain:{dominio}"
+            search_response = requests.get(search_url, headers=headers)
+            total_real = 0
+            if search_response.status_code == 200:
+                total_real = search_response.json().get('total', 0)
 
             return {
                 "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
                 "report": f"https://urlscan.io/result/{uuid}/",
                 "ip": ip_scan if ip_scan else "IP em processamento...",
                 "uuid": uuid,
-                "total_scans": total_real  # Agora traz o número exato do site
+                "total_scans": total_real
             }
     except:
         return None
@@ -282,15 +281,17 @@ with aba_links:
                 dv = res['dados_visual']
                 dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
                 
-                # Banner de consultas (Igual ao seu print desejado)
-                st.warning(f"🌐 O endereço {dominio_exibir} foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
+                # Banner de consultas
+                st.warning(f"🌐 O endereço **{dominio_exibir}** foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
                 
                 if dv['ip'] != "IP em processamento...":
                     st.warning(f"🌐 **Endereço Digital (IP) do Site:** {dv['ip']}")
                 
-                # Exibição da Imagem e Relatório Técnico
-                st.image(dv['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado")
-                st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
+                # O SEGREDO: Aguardar o servidor gerar a imagem
+                with st.spinner("⏳ Capturando evidência visual segura..."):
+                    time.sleep(15)  # Tempo para o servidor do URLScan criar o .png
+                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Imagem gerada em ambiente isolado")
+                    st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
 
                 # Alertas de Segurança Específicos
                 if maliciosos > 0:
