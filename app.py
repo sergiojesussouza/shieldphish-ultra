@@ -186,8 +186,7 @@ with aba_links:
 
                     # --- NÚCLEO DE MÉTRICAS DINÂMICAS ---
                     m1, m2, m3 = st.columns(3)
-
-                    # 1. Conversão e Lógica de Relacionamento (Veredito vs. Confiança)
+                    
                     try:
                         confianca_valor = float(res_core['detalhes']['ia'].replace('%', ''))
                     except:
@@ -203,25 +202,25 @@ with aba_links:
                         label_ia = "🔍 BAIXA (DADOS INSUFICIENTES)"
                         cor_delta = "inverse" # Vermelho/Alerta
                         
-                        # 2. Exibição das Métricas
-                        m1.metric("Score de Risco", res_core['score'])
-                        m2.metric("Confiança IA", res_core['detalhes']['ia'], delta=label_ia, delta_color=cor_delta)
-                        m3.metric("Ameaças (VT)", f"{maliciosos} alertas")
+                    # 2. Exibição das Métricas
+                    m1.metric("Score de Risco", res_core['score'])
+                    m2.metric("Confiança IA", res_core['detalhes']['ia'], delta=label_ia, delta_color=cor_delta)
+                    m3.metric("Ameaças (VT)", f"{maliciosos} alertas")
 
-                        st.markdown("---")
+                    st.markdown("---")
 
-                        # 3. Localização e Infraestrutura
-                        g1, g2 = st.columns(2)
-                        with g1:
-                            st.markdown("**📍 Localização do Servidor**")
-                            if res_core['geo']['bandeira']:
-                                st.image(res_core['geo']['bandeira'], width=35)
-                            st.text(f"País: {res_core['geo']['pais']}")
-                            st.markdown("`[!] SSL RECENTE`" if idade and idade < 7 else "`[✔] SSL ESTÁVEL`")
+                    # 3. Localização e Infraestrutura
+                    g1, g2 = st.columns(2)
+                    with g1:
+                        st.markdown("**📍 Localização do Servidor**")
+                        if res_core['geo']['bandeira']:
+                            st.image(res_core['geo']['bandeira'], width=35)
+                        st.text(f"País: {res_core['geo']['pais']}")
+                        st.markdown("`[!] SSL RECENTE`" if idade and idade < 7 else "`[✔] SSL ESTÁVEL`")
 
-                        with g2:
-                            st.markdown("**🏢 Infraestrutura (ASN)**")
-                            st.info(f"{res_core['geo']['provedor']}")
+                    with g2:
+                        st.markdown("**🏢 Infraestrutura (ASN)**")
+                        st.info(f"{res_core['geo']['provedor']}")
 
                 # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
                 with st.spinner('Iniciando perícia técnica em ambiente isolado de segurança...'):
