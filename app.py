@@ -120,7 +120,9 @@ def consultar_urlscan(url):
                 "screenshot": f"https://urlscan.io/screenshots/{uuid}.png",
                 "report": f"https://urlscan.io/result/{uuid}/",
                 "ip": ip_scan if ip_scan else "IP em processamento...",
-                "uuid": uuid # Importante para consultas futuras se necessário
+                "uuid": uuid,
+                # CAPTURA DINÂMICA: Busca o total de análises no histórico do urlscan
+                "total_scans": res_json.get('stats', {}).get('total', 'várias') 
             }
     except:
         return None
@@ -195,25 +197,22 @@ with aba_links:
                         st.info(f"{res_core['geo']['provedor']}")
 
                 # --- 3. BLOCO URLSCAN CORRIGIDO (EVIDÊNCIA VISUAL) ---
-                with st.spinner('Iniciando perícia técnica em ambiente isolado de segurança..'):
+                with st.spinner('Iniciando perícia técnica em ambiente isolado de segurança...'):
                     dados_visual = consultar_urlscan(url_input)
                     if dados_visual:
                         st.markdown("---")
                         st.subheader("📸 Visualização em Tempo Real")
                         
                         # Exibição do IP detectado no Scan
-                        ip_urlscan = dados_visual.get('ip')
-                        ip_ia = res_core.get('geo', {}).get('ip') # Ajuste conforme sua classe ShieldPhishUltraCore
+                        dominio_limpo = url_input.replace("https://", "").replace("http://", "").split("/")[0]
+                        total = dados_visual.get('total_scans', 'várias')
 
-                        # Prioridade: IP real do scan > IP da IA
-                        ip_final = None
-                        if ip_urlscan and ip_urlscan != "IP em processamento...":
-                            ip_final = ip_urlscan
-                        elif ip_ia:
-                            ip_final = ip_ia
+                        # BANNER AMARELO DINÂMICO (Informação do urlscan.io)
+                        st.warning(f"🌐 O site **{dominio_limpo}** foi analisado **{total} vezes** no urlscan.io.")
 
-                        # Exibição do Banner conforme o resultado
-                        if ip_final:
+                        # Exibição do IP (Banner Secundário se detectado)
+                        ip_final = dados_visual.get('ip')
+                        if ip_final and ip_final != "IP em processamento...":
                             st.warning(f"🌐 **Endereço Digital (IP) do Site:** {ip_final}")
                         else:
                             st.info("🌐 **Infraestrutura:** Servidor Protegido (Cloudflare/CDN)")
@@ -328,7 +327,7 @@ with col2:
             * **A visualização é segura**: Você pode observar a "Foto do Site" aqui no sistema sem perigo, pois ela foi gerada em um ambiente isolado de segurança.
             """)
 
-            with st.expander("📚 Entenda melhor o termo 'IP'"):
+            with st.expander("📚 Entenda melhor o termo "IP" "):
                 st.caption("O IP é o endereço real da máquina que hospeda o site. Quando ele é marcado como malicioso, é porque aquele computador específico já foi pego cometendo crimes digitais.")
 
 # --- ABA 2: E-MAILS & VAZAMENTOS ---
