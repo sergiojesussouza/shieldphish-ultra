@@ -190,8 +190,8 @@ with aba_links:
                     # 1. Conversão e Lógica de Relacionamento (Veredito vs. Confiança)
                     try:
                         confianca_valor = float(res_core['detalhes']['ia'].replace('%', ''))
-                        except:
-                            confianca_valor = 0.0
+                    except:
+                        confianca_valor = 0.0
                         
                     if confianca_valor >= 80:
                         label_ia = "✅ ALTA CERTEZA"
