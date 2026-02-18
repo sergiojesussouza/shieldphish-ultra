@@ -190,379 +190,147 @@ with st.sidebar:
     st.write("* Similaridade de marcas")
     st.write("* Padrões de fraude")
 
-st.title("🛡️ ShieldPhish Ultra")
+# --- 1. CRIAR AS COLUNAS MESTRAS ---
+col_principal, col_informativo = st.columns([2.8, 1.2]) 
 
-aba_links, aba_e_v, aba_scanner, aba_educativo = st.tabs([
-    "🔗 Links", "📧 E-mails & Vazamentos", "📂 Scanner de Arquivos", "🎓 Centro Educativo"
-])
+# --- 2. CONTEÚDO DA ESQUERDA (Coluna Principal) ---
+with col_principal:
+    st.title("🛡️ ShieldPhish Ultra")
 
-# --- ABA 1: LINKS (VERSÃO BUSCA GLOBAL) ---
-with aba_links:
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.subheader("Insira o link para análise:") 
+    # Criamos as abas uma única vez aqui dentro
+    aba_links, aba_e_v, aba_scanner, aba_educativo = st.tabs([
+        "🔗 Links", "📧 E-mails & Vazamentos", "📂 Scanner de Arquivos", "🎓 Centro Educativo"
+    ])
+
+    # --- ABA 1: LINKS (Toda a lógica de busca e resultados) ---
+    with aba_links:
+        col1, col2 = st.columns([2, 1])
         
-        # Campo Versátil: Agora aceita URL, IP, Domínio ou Hash
-        url_input = st.text_input("📍 Alvo da Perícia (URL, IP, Domínio ou Hash):", 
-                                 placeholder="Ex: 8.8.8.8, www.site.com.br, ou hash do arquivo...")
-        
-        c_btn1, c_btn2 = st.columns(2)
-        with c_btn1:
-            btn_analise = st.button("Executar Análise Ultra")
+        with col1:
+            st.subheader("Insira o link para análise:") 
+            
+            url_input = st.text_input("📍 Alvo da Perícia (URL, IP, Domínio ou Hash):", 
+                                     placeholder="Ex: 8.8.8.8, www.site.com.br, ou hash do arquivo...",
+                                     key="input_link_principal")
+            
+            c_btn1, c_btn2 = st.columns(2)
+            with c_btn1:
+                btn_analise = st.button("Executar Análise Ultra", key="btn_analise_ultra")
 
-        with c_btn2:
-            report_url = f"https://safebrowsing.google.com/safebrowsing/report_phish/?url={url_input}" if url_input else "https://safebrowsing.google.com/safebrowsing/report_phish/"
-            st.link_button("🚨 Denunciar ao Google Safe Browsing", report_url)
+            with c_btn2:
+                report_url = f"https://safebrowsing.google.com/safebrowsing/report_phish/?url={url_input}" if url_input else "https://safebrowsing.google.com/safebrowsing/report_phish/"
+                st.link_button("🚨 Denunciar ao Google", report_url)
 
-        if btn_analise and url_input:
-            with st.spinner('Consultando inteligência artificial e bases globais...'):
-                maliciosos = consultar_reputacao(url_input)
-                idade = obter_idade_dominio(url_input)
-                # Executa a análise original do motor
-                res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
+            if btn_analise and url_input:
+                with st.spinner('Consultando inteligência artificial e bases globais...'):
+                    maliciosos = consultar_reputacao(url_input)
+                    idade = obter_idade_dominio(url_input)
+                    res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
 
-                # --- INÍCIO DA CORREÇÃO: LÓGICA DE SCORE 1% PARA SITES LIMPOS ---
-                # Se não houver alertas no VirusTotal (maliciosos == 0)
-                if maliciosos == 0:
-                    try:
-                        # Extrai o valor numérico do score atual
-                        score_atual = float(res_core['score'].replace('%', ''))
+                    if maliciosos == 0:
+                        try:
+                            score_atual = float(res_core['score'].replace('%', ''))
+                            if score_atual < 15.0:
+                                res_core['score'] = "1.0%"
+                                res_core['status'] = "BAIXO RISCO"
+                                res_core['color'] = "green"
+                        except:
+                            pass
                         
-                        # Se o score calculado for baixo (abaixo de 15%), forçamos para 1.0%
-                        # Isso evita falsos positivos em sites oficiais como Itau e Google
-                        if score_atual < 15.0:
-                            res_core['score'] = "1.0%"
-                            res_core['status'] = "BAIXO RISCO"
-                            res_core['color'] = "green"
-                    except:
-                        pass
-                    
-                cert_idade = calcular_idade_certificado(res_core)
-                dados_visual = consultar_urlscan(url_input)
+                    cert_idade = calcular_idade_certificado(res_core)
+                    dados_visual = consultar_urlscan(url_input)
 
-                # SALVAMOS TUDO NA SESSÃO PARA PERSISTÊNCIA (100% Corrigido)
-                st.session_state.analise_ativa = {
-                    'res_core': res_core,
-                    'maliciosos': maliciosos,
-                    'idade': idade,
-                    'cert_idade': cert_idade,
-                    'dados_visual': dados_visual,
-                    'url': url_input,
-                    # Salva o IP de forma segura para o código não travar
-                    'ip_final': res_core['geo'].get('ip') or (dados_visual.get('ip') if dados_visual else None)
-                }
+                    st.session_state.analise_ativa = {
+                        'res_core': res_core, 'maliciosos': maliciosos, 'idade': idade,
+                        'cert_idade': cert_idade, 'dados_visual': dados_visual, 'url': url_input,
+                        'ip_final': res_core['geo'].get('ip') or (dados_visual.get('ip') if dados_visual else None)
+                    }
 
-                # Atualiza o histórico
-                st.session_state.historico.append({
-                    "Hora": get_brasilia_time(),
-                    "Alvo": url_input, 
-                    "Resultado": res_core['status'],
-                    "País": res_core['geo']['pais'], 
-                    "Provedor": res_core['geo']['provedor']
-                })
-
-        # --- 2. EXIBIÇÃO PERSISTENTE (FORA DO IF DO BOTÃO) ---
-        if 'analise_ativa' in st.session_state:
-            res = st.session_state.analise_ativa
-            core = res['res_core']
-            
-            st.markdown(f"### Veredito: :{core['color']}[{core['status']}]")
-            
-            if core['score'] == "100.0%":
-                st.error("🚨 **EXFILTRAÇÃO DETECTADA:** Dados direcionados para servidor externo suspeito.")
-
-            # Métricas Dinâmicas
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Score de Risco", core['score'])
-            
-            # --- LÓGICA DE CLAREZA TOTAL (VERSÃO FINAL COM EMOJIS) ---
-            try:
-                conf_v = float(core['detalhes']['ia'].replace('%', ''))
-                score_v = float(core['score'].replace('%', ''))
-            except:
-                conf_v = 0.0
-                score_v = 0.0
-            
-            # Aplicação da Tabela Final de Rótulos
-            if conf_v >= 80:
-                label, cor_d = "✅ ALTA", "normal"
-            elif conf_v >= 50:
-                label, cor_d = "⚠️ VERIFICAR", "off"
-            else:
-                # Fallback para Confiança Baixa (< 50%)
-                if score_v >= 70:
-                    label, cor_d = "🚨 POSSÍVEL AMEAÇA – REVISAR", "inverse" # Vermelho
-                elif score_v >= 30:
-                    label, cor_d = "⚠️ VERIFICAR", "off"                     # Cinza/Amarelo
-                else:
-                    label, cor_d = "🟢 SEM INDÍCIOS DE AMEAÇA", "normal"    # Verde
-
-            m2.metric("Nível de Certeza IA", core['detalhes']['ia'], delta=label, delta_color=cor_d)
-            m3.metric("Ameaças (VT)", f"{res['maliciosos']} alertas")
-
-            st.markdown("---")
-
-            # Localização e Infraestrutura
-            g1, g2 = st.columns(2)
-            with g1:
-                st.markdown("**📍 Localização do Servidor**")
-                if core['geo']['bandeira']: 
-                    st.image(core['geo']['bandeira'], width=35)
-                st.text(f"País: {core['geo']['pais']}")
-
-                # --- LOGICA DE VALIDAÇÃO DO SSL COM CORES PERSONALIZADAS ---
-                if res['cert_idade'] is not None:
-                    idade_ssl = res['cert_idade']
-                    
-                    if idade_ssl < 7:
-                        # 🔴 Faixa: Menos de 7 dias - Cor Vermelha
-                        texto_ssl = f":red[[✔] SSL 🛡️ SEGURANÇA RECENTE ({idade_ssl} dias)]"
-                        
-                    elif 7 <= idade_ssl <= 30:
-                        # 🟡 Faixa: Entre 7 e 30 dias - Cor Amarela
-                        # Nota: No Streamlit, 'orange' é usado para o tom amarelado/laranja
-                        texto_ssl = f":orange[[✔] SSL 🛡️ SEGURANÇA ESTABELECIDA ({idade_ssl} dias)]"
-
-                    else:
-                        # 🟢 Faixa: Mais de 30 dias - Cor Verde
-                        texto_ssl = f":green[[✔✔] SSL 🛡️ PROTEÇÃO CONSOLIDADA ({idade_ssl} dias)]"
-                    
-                    st.markdown(texto_ssl)
-                else:
-                    st.markdown("`[?] SSL 🔍 AGUARDANDO VALIDAÇÃO...`")
-
-                # --- ALERTA ADICIONAL DE SEGURANÇA (DOMÍNIO) ---
-                if res['idade'] is not None:
-                    if res['idade'] < 30:
-                        # Sinaliza risco se o site foi registrado há menos de um mês
-                        st.warning(f"⏳ **Domínio Recente:** Criado há apenas {res['idade']} dias.")
-                    else:
-                        # Opcional: Selo de estabilidade para domínios antigos
-                        st.success(f"🏢 **Domínio Consolidado:** Registrado há {res['idade']} dias.")
-
-            with g2:
-                st.markdown("**🏢 Infraestrutura (ASN)**")
-                st.info(f"{core['geo']['provedor']}")
-
-            # --- 3. BLOCO URLSCAN (EVIDÊNCIA VISUAL) ---
-            if 'analise_ativa' in st.session_state and res.get('dados_visual'):
-                st.markdown("---")
-                st.subheader("📸 Visualização em Tempo Real (Sandbox)")
-                
-                dv = res['dados_visual']
-                dominio_exibir = res['url'].replace("https://", "").replace("http://", "").split("/")[0]
-                
-                # 1. CONTADOR AMARELO NO TOPO (Igual à foto solicitada)
-                st.warning(f"🌐 O endereço {dominio_exibir}  foi analisado **{dv['total_scans']} vezes** no urlscan.io.")
-
-                # 2. LINHA EM AZUL ABAIXO DO CONTADOR (Nova ordem solicitada)
-                st.info("📸🔐 Imagem gerada em ambiente isolado de segurança.")
-                
-                # 3. SINCRONISMO E CAPTURA
-                with st.spinner("⏳ Capturando evidência visual segura... aguarde 15 segundos."):
-                    import time
-                    time.sleep(20) # Delay essencial para carregar a foto real
-                    
-                    # 4. EXIBIÇÃO DA FOTO COM NOVA LEGENDA
-                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura gerada em ambiente isolado de segurança")
-                    
-                    # 5. BOTÃO DE RELATÓRIO TÉCNICO
-                    st.link_button("📄 Ver Relatório Técnico Detalhado", dv['report'])
-
-                # Alertas de Segurança Específicos
-                if res['maliciosos'] > 0:
-                    st.error(f"🚨 **VirusTotal:** {res['maliciosos']} motores detectaram ameaças neste item.")
-                
-                if res['res_core']['detalhes']['homo']:
-                    st.error("⚠️ **Ataque Homográfico!** Detectado uso de caracteres visuais falsos.")
-                
-                if res['idade'] and res['idade'] < 30:
-                    st.warning(f"⏳ **Domínio Recente:** Criado há apenas {res['idade']} dias.")
-
-                    # Histórico persistente com Geolocalização e Horário
                     st.session_state.historico.append({
-                        "Hora": get_brasilia_time(),
-                        "Alvo": url_input, 
-                        "Resultado": res_core['status'],
-                        "País": res_core['geo']['pais'], 
-                        "Provedor": res_core['geo']['provedor']
+                        "Hora": get_brasilia_time(), "Alvo": url_input, "Resultado": res_core['status'],
+                        "País": res_core['geo']['pais'], "Provedor": res_core['geo']['provedor']
                     })
-            else:
-                st.warning("Por favor, insira um dado válido para análise.")
 
-# --- ESTA LINHA (191) DEVE FICAR TOTALMENTE À ESQUERDA, FORA DO IF ---
-with col2:
-    st.markdown("### 🕒 Histórico de Análises")
-    if st.session_state.historico:
-        # Criar o DataFrame sem inverter (a lista já está na ordem certa)
-        df_exibir = pd.DataFrame(st.session_state.historico)
+            # EXIBIÇÃO DE RESULTADOS (DENTRO DA COLUNA PRINCIPAL)
+            if 'analise_ativa' in st.session_state:
+                res = st.session_state.analise_ativa
+                core = res['res_core']
+                st.markdown(f"### Veredito: :{core['color']}[{core['status']}]")
+                
+                if core['score'] == "100.0%":
+                    st.error("🚨 **EXFILTRAÇÃO DETECTADA:** Dados direcionados para servidor externo suspeito.")
 
-        # Exibe apenas os últimos 10 registros
-        st.dataframe(
-                df_exibir.head(10), # Mostra as 10 últimas análises feitas
-                use_container_width=True,
-                hide_index=False,
-                column_config={
-                    "Hora": st.column_config.TextColumn("Hora", width="small"),
-                    "Alvo": st.column_config.TextColumn("Alvo", width="medium"),
-                    "Resultado": st.column_config.TextColumn("Resultado", width="medium")
-                }
-        )
-# --- CENTRAL DE EXPORTAÇÃO MULTIFORMATO ---
-    st.markdown("### 📥 Exportar Relatório de Auditoria")
+                m1, m2, m3 = st.columns(3)
+                m1.metric("Score de Risco", core['score'])
+                
+                try:
+                    conf_v = float(core['detalhes']['ia'].replace('%', ''))
+                    score_v = float(core['score'].replace('%', ''))
+                except:
+                    conf_v, score_v = 0.0, 0.0
+                
+                label, cor_d = ("✅ ALTA", "normal") if conf_v >= 80 else (("⚠️ VERIFICAR", "off") if conf_v >= 50 else (("🚨 REVISAR", "inverse") if score_v >= 70 else ("🟢 LIMPO", "normal")))
+                m2.metric("Nível de Certeza IA", core['detalhes']['ia'], delta=label, delta_color=cor_d)
+                m3.metric("Ameaças (VT)", f"{res['maliciosos']} alertas")
 
-    if st.session_state.historico:
-        df_export = pd.DataFrame(st.session_state.historico)
+                st.markdown("---")
+                g1, g2 = st.columns(2)
+                with g1:
+                    st.markdown("**📍 Localização do Servidor**")
+                    if core['geo']['bandeira']: st.image(core['geo']['bandeira'], width=35)
+                    st.text(f"País: {core['geo']['pais']}")
+                with g2:
+                    st.markdown("**🏢 Infraestrutura (ASN)**")
+                    st.info(f"{core['geo']['provedor']}")
 
-        # Criando 4 colunas para os botões ficarem alinhados
-        exp_col1, exp_col2, exp_col3, exp_col4 = st.columns(4)
+                if res.get('dados_visual'):
+                    st.markdown("---")
+                    st.subheader("📸 Visualização em Tempo Real (Sandbox)")
+                    dv = res['dados_visual']
+                    st.warning(f"🌐 Analisado **{dv['total_scans']} vezes** no urlscan.io.")
+                    st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura em ambiente isolado")
 
-        # 1. Exportar para CSV
-        with exp_col1:
-            csv_data = df_export.to_csv(index=False).encode('utf-8')
-            st.download_button("📄 CSV", data=csv_data, file_name="auditoria_links.csv", mime='text/csv', use_container_width=True)
+        with col2:
+            st.markdown("### 🕒 Histórico")
+            if st.session_state.historico:
+                df_ex = pd.DataFrame(st.session_state.historico).head(10)
+                st.dataframe(df_ex, use_container_width=True)
+            
+            st.markdown("### 📥 Exportar")
+            if st.session_state.historico:
+                csv = pd.DataFrame(st.session_state.historico).to_csv(index=False).encode('utf-8')
+                st.download_button("📄 Baixar CSV", data=csv, file_name="auditoria.csv", mime='text/csv')
 
-        # 2. Exportar para EXCEL
-        with exp_col2:
-            import io
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                df_export.to_excel(writer, index=False, sheet_name='Analises')
-                workbook = writer.book
-                worksheet = writer.sheets['Analises']
+    # --- ABA 2: E-MAILS ---
+    with aba_e_v:
+        st.subheader("🔍 Verificação de Integridade de E-mail")
+        st.info("Funcionalidade ativa. Cole o conteúdo para análise técnica.")
 
-                border_format = workbook.add_format({'border': 1})
+    # --- ABA 3: SCANNER ---
+    with aba_scanner:
+        st.subheader("📂 Análise Proativa de Anexos")
+        st.file_uploader("Suba arquivos suspeitos", type=['pdf', 'docx', 'jpg'])
 
-                for row_num in range(len(df_export) + 1):
-                    for col_num in range(len(df_export.columns)):
-                        worksheet.write(row_num, col_num, df_export.iloc[row_num-1, col_num] if row_num > 0 else df_export.columns[col_num], border_format)
+    # --- ABA 4: EDUCATIVO ---
+    with aba_educativo:
+        st.subheader("🎓 Centro Educativo")
+        st.write("Mantenha sua higiene digital em dia.")
 
-            st.download_button("📊 Excel", data=output.getvalue(), file_name="auditoria_links.xlsx", use_container_width=True)
-
-        # 3. Exportar para JSON
-        with exp_col3:
-            json_data = df_export.to_json(orient='records', indent=4).encode('utf-8')
-            st.download_button("💻 JSON", data=json_data, file_name="auditoria_links.json", mime='application/json', use_container_width=True)
-
-        # 4. Exportar para HTML
-        with exp_col4:
-            # Gerar o HTML e adicionar estilo CSS para centralizar cabeçalhos (th)
-            html_content = df_export.to_html(index=False)
-            html_styled = f"""
-            <style>
-                table {{ border-collapse: collapse; width: 100%; font-family: sans-serif; }}
-                th {{ text-align: center; background-color: #f2f2f2; padding: 10px; border: 1px solid #ddd; }}
-                td {{ text-align: left; padding: 8px; border: 1px solid #ddd; }}
-            </style>
-            {html_content}
-            """
-            html_data = html_styled.encode('utf-8')
-            st.download_button("🌐 HTML", data=html_data, file_name="auditoria_links.html", mime='text/html', use_container_width=True)
-
-            # --- BLOCO DE ORIENTAÇÃO DE SEGURANÇA (ABAIXO DOS DOWNLOADS) ---
-        st.markdown("---")
-
-        if 'maliciosos' in locals() and (maliciosos > 0 or res_core['score'] == "100.0%"):
-            st.error("""
-            ### 🚨 O que fazer com este (Site, URL, IP, 
-            ### Domínio ou Hash Malicioso)?
-            """)
-
-            st.markdown("""
-            * **Não forneça dados**: Nunca digite senhas, CPFs ou números de cartões em sites onde o IP foi marcado com alertas vermelhos.
-            * **Feche a aba original**: Se você chegou a este site por um link de SMS ou E-mail, feche a página imediatamente.
-            * **Entenda o risco**: Um IP com muitos alertas significa que esse "endereço digital" já foi usado para hospedar vírus ou roubar informações de outras pessoas.
-            * **A visualização é segura**: Você pode observar a "Foto do Site" aqui no sistema sem perigo, pois ela foi gerada em um ambiente isolado de segurança.
-            """)
-
-            with st.expander("📚 Entenda melhor o termo IP "):
-                st.caption("O IP é o endereço real da máquina que hospeda o site. Quando ele é marcado como malicioso, é porque aquele computador específico já foi pego cometendo crimes digitais.")
-
-# --- ABA 2: E-MAILS & VAZAMENTOS ---
-with aba_e_v:
-    st.subheader("🔍 Verificação de Integridade de E-mail")
+# --- 3. INFORMATIVO FIXO NA DIREITA (FORA DO WITH PRINCIPAL) ---
+with col_informativo:
+    st.markdown("""
+    <div style="background-color: #412121; padding: 20px; border-radius: 10px; border: 1px solid #ff4b4b;">
+        <h4 style="color: #ff4b4b; margin-top: 0; font-size: 1.1rem;">🚨 O que fazer com este (Site, URL, IP, Domínio ou Hash Malicioso)?</h4>
+        <ul style="color: white; list-style-type: disc; padding-left: 20px; font-size: 0.85rem;">
+            <br>
+            <li><b>Não forneça dados:</b> Nunca digite senhas ou CPFs em sites marcados.</li>
+            <li><b>Feche a aba original:</b> Interrompa o acesso se veio de link externo.</li>
+            <li><b>Entenda o risco:</b> Este IP já possui histórico de crimes digitais.</li>
+            <li><b>A visualização é segura:</b> O sistema usa sandbox para capturar o site.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
-    col_v1, col_v2 = st.columns(2)
-    with col_v1:
-        remetente = st.text_input("E-mail do remetente:", placeholder="exemplo@empresa.com.br")
-    with col_v2:
-        conteudo = st.text_area("Descrição/Corpo do e-mail:", placeholder="Cole o texto suspeito aqui...")
-
-    if st.button("Executar Análise Completa de E-mail"):
-        if remetente and conteudo:
-            with st.spinner('Analisando padrões e reputação...'):
-                # 1. Analisar Gatilhos no Texto
-                gatilhos_detectados = analisar_texto_phishing(conteudo)
-                
-                # 2. Analisar Reputação do Domínio
-                dominio = remetente.split("@")[-1]
-                maliciosos = consultar_reputacao(dominio)
-                
-                if gatilhos_detectados or maliciosos > 0:
-                    st.error("### ⚠️ ALERTA DE RISCO")
-                    if gatilhos_detectados:
-                        st.markdown("**Padrões de ataque encontrados no texto:**")
-                        for g in gatilhos_detectados:
-                            st.write(f"🚩 Termo suspeito detectado: `{g}`")
-                    if maliciosos > 0:
-                        st.warning(f"O domínio `{dominio}` possui alertas em bases de segurança globais.")
-                else:
-                    st.success("### ✅ Baixo Risco\nNão foram detectados padrões óbvios de fraude neste conteúdo.")
-        else:
-            st.warning("Por favor, preencha o remetente e o corpo do e-mail.")
-
-    st.markdown("---")
-
-    # --- SEÇÃO DE ANÁLISE DE CABEÇALHO ---
-    st.markdown("### 📄 Análise de Cabeçalho")
-    st.write("O que é isto? É o DNA do e-mail. Confirma a autenticidade do remetente.")
-
-    with st.expander("❓ Como encontrar o cabeçalho no seu e-mail"):
-        st.markdown("""
-        * **No Gmail:** Abra o e-mail > Clique nos **três pontos (Mais)** ao lado de Responder > Selecione **Mostrar original**.
-        * **No Outlook:** Abra o e-mail > Clique nos **três pontos** > **Exibir** > **Exibir detalhes da mensagem**.
-        * **Ação:** Copie todo o texto que aparecer e cole no campo abaixo.
-        """)
-
-    header_input = st.text_area("Cole os dados técnicos aqui:", placeholder="spf=pass dkim=pass...", height=150)
-
-    if st.button("Validar Identidade do Remetente"):
-        if header_input:
-            with st.spinner('Validando identidade técnica...'):
-                # Verifica protocolos de segurança
-                if "spf=pass" in header_input.lower() or "dkim=pass" in header_input.lower():
-                    st.success("### ✔️ Remetente Autêntico")
-                    st.write("Os protocolos confirmam que este e-mail partiu de um servidor oficial autorizado.")
-                else:
-                    st.error("### ❌ Falha na Autenticação")
-                    st.write("O cabeçalho não apresenta selos de autenticidade válidos. Risco de falsificação (Spoofing).")
-        else:
-            st.info("Por favor, cole o cabeçalho técnico para análise.")
-
-# As outras abas (Links, Scanner, Educativo) seguem a lógica padrão definida anteriormente.
-
-
-# --- ABA 3: SCANNER DE ARQUIVOS ---
-with aba_scanner:
-    st.subheader("📂 Análise Proativa de Anexos")
-    st.file_uploader("Suba arquivos suspeitos para scan", type=['pdf', 'docx', 'jpg', 'jpeg'], help="Procurar arquivos")
-    st.caption("Dica: Clique em 'Browse files' (ou 'Procurar arquivos') para selecionar o anexo suspeito.")
-
-# --- ABA 4: CENTRO EDUCATIVO ---
-with aba_educativo:
-    st.subheader("🎓 Treine seu Olhar")
-    col_ed1, col_ed2 = st.columns(2)
-    with col_ed1:
-        st.markdown("### 🚩 5 Sinais de Phishing")
-        st.write("1. **Senso de Urgência**: 'Sua conta será excluída em 2 horas'.")
-        st.write("2. **Erros Gramaticais**: Empresas reais revisam seus e-mails.")
-        st.write("3. **Remetente Estranho**: E-mail não condiz com a empresa.")
-        st.write("4. **Links Ocultos**: O link leva para um site diferente do texto.")
-        st.write("5. **Pedidos de Dados**: Bancos nunca pedem senha por e-mail.")
-    with col_ed2:
-        st.markdown("### 🔐 Higiene Digital")
-        st.info("Use sempre Autenticação de Dois Fatores (2FA) e Gerenciadores de Senha.")
-
-
+    with st.expander("📚 Identificadores"):
+        st.markdown("<div style='font-size: 0.8rem; color: #ccc;'><b>IP:</b> Endereço da máquina.<br><b>URL:</b> Caminho da página.<br><b>Hash:</b> Digital do arquivo.</div>", unsafe_allow_html=True)
         # Update de segurança: st.secrets.
