@@ -464,7 +464,7 @@ with col2:
         st.markdown("---")
 
         if 'maliciosos' in locals() and (maliciosos > 0 or res_core['score'] == "100.0%"):
-            st.error("### 🚨 O que fazer com este IP Malicioso?")
+            st.error("### 🚨 O que fazer com este (Site, URL, IP, Domínio ou Hash Malicioso)?")
 
             st.markdown("""
             * **Não forneça dados**: Nunca digite senhas, CPFs ou números de cartões em sites onde o IP foi marcado com alertas vermelhos.
