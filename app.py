@@ -280,10 +280,33 @@ with aba_links:
                 if core['geo']['bandeira']: 
                     st.image(core['geo']['bandeira'], width=35)
                 st.text(f"País: {core['geo']['pais']}")
-                
+
+                # --- LOGICA DE VALIDAÇÃO DO SSL ATUALIZADA ---
                 if res['cert_idade'] is not None:
-                    txt_ssl = f"`[!]SSL ⚠️ RECENTE ({res['cert_idade']} dias)`" if res['cert_idade'] < 7 else "`[✔]SSL 🛡️ ESTÁVEL`"
-                    st.markdown(txt_ssl)
+                    idade_ssl = res['cert_idade']
+                    
+                    if idade_ssl < 7:
+                        # 🔴 Faixa: Menos de 7 dias
+                        texto_ssl = f"`[✔] SSL 🛡️ SEGURANÇA RECENTE ({idade_ssl} dias)`"
+                    elif 7 <= idade_ssl <= 30:
+                        # 🟡 Faixa: Entre 7 e 30 dias
+                        texto_ssl = f"`[✔] SSL 🛡️ SEGURANÇA ESTABELECIDA ({idade_ssl} dias)`"
+                    else:
+                        # 🟢 Faixa: Mais de 30 dias
+                        texto_ssl = f"`[✔✔] SSL 🛡️ PROTEÇÃO CONSOLIDADA ({idade_ssl} dias)`"
+                    
+                    st.markdown(texto_ssl)
+                else:
+                    st.markdown("`[?] SSL 🔍 AGUARDANDO VALIDAÇÃO...`")
+
+                # --- ALERTA ADICIONAL DE SEGURANÇA (DOMÍNIO) ---
+                if res['idade'] is not None:
+                    if res['idade'] < 30:
+                        # Sinaliza risco se o site foi registrado há menos de um mês
+                        st.warning(f"⏳ **Domínio Recente:** Criado há apenas {res['idade']} dias.")
+                    else:
+                        # Opcional: Selo de estabilidade para domínios antigos
+                        st.success(f"🏢 **Domínio Consolidado:** Registrado há {res['idade']} dias.")
 
             with g2:
                 st.markdown("**🏢 Infraestrutura (ASN)**")
@@ -304,9 +327,9 @@ with aba_links:
                 st.info("📸🔐 Imagem gerada em ambiente isolado de segurança.")
                 
                 # 3. SINCRONISMO E CAPTURA
-                with st.spinner("⏳ Capturando evidência visual segura..."):
+                with st.spinner("⏳ Capturando evidência visual segura... aguarde 15 segundos.")
                     import time
-                    time.sleep(15) # Delay essencial para carregar a foto real
+                    time.sleep(20) # Delay essencial para carregar a foto real
                     
                     # 4. EXIBIÇÃO DA FOTO COM NOVA LEGENDA
                     st.image(dv['screenshot'], use_container_width=True, caption="🔒 Captura gerada em ambiente isolado de segurança")
