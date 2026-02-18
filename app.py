@@ -207,7 +207,25 @@ with aba_links:
             with st.spinner('Consultando inteligência artificial e bases globais...'):
                 maliciosos = consultar_reputacao(url_input)
                 idade = obter_idade_dominio(url_input)
+                # Executa a análise original do motor
                 res_core = st.session_state.engine.analyze_link(url_input, maliciosos=maliciosos)
+
+                # --- INÍCIO DA CORREÇÃO: LÓGICA DE SCORE 1% PARA SITES LIMPOS ---
+                # Se não houver alertas no VirusTotal (maliciosos == 0)
+                if maliciosos == 0:
+                    try:
+                        # Extrai o valor numérico do score atual
+                        score_atual = float(res_core['score'].replace('%', ''))
+                        
+                        # Se o score calculado for baixo (abaixo de 15%), forçamos para 1.0%
+                        # Isso evita falsos positivos em sites oficiais como Itau e Google
+                        if score_atual < 15.0:
+                            res_core['score'] = "1.0%"
+                            res_core['status'] = "BAIXO RISCO"
+                            res_core['color'] = "green"
+                    except:
+                        pass
+                    
                 cert_idade = calcular_idade_certificado(res_core)
                 dados_visual = consultar_urlscan(url_input)
 
