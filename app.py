@@ -299,7 +299,7 @@ with aba_links:
                     label, cor_d = "🟢 SEM INDÍCIOS DE AMEAÇA", "normal"    # Verde
 
             m2.metric("Nível de Certeza IA", core['detalhes']['ia'], delta=label, delta_color=cor_d)
-            m3.metric("Ameaças (VT)", f"{res['maliciosos']} alertas")
+            m3.metric("Ameaças (VirusTotal)", f"{res['maliciosos']} alertas")
 
             st.markdown("---")
 
