@@ -176,7 +176,19 @@ with st.sidebar:
     st.caption("Privacidade Garantida: Este sistema não armazena e-mails, senhas ou conteúdos analisados. A análise é processada em memória e descartada após a sessão.")
     st.markdown("---")
     st.markdown("**Fontes de Análise:**")
-    st.write("* Reputação global (VirusTotal)\n* Análise visual em ambiente virtual isolado e seguro sandbox (Urlscan.io)\n* Registro de domínios(Whois)\n* Similaridade de marcas\n* Padrões de fraude")
+    st.write("* Reputação global (VirusTotal)")
+    st.write("* Análise visual em ambiente virtual isolado e seguro sandbox (Urlscan.io):")
+    # O uso do caption abaixo cria o detalhamento que você solicitou com recuo visual
+    st.caption("""
+    - Análise de Phishing
+    - Investigação de Redes
+    - Análise de Cabeçalhos e Cookies
+    - Captura de Tela
+    - Inspeção de Código
+    """)
+    st.write("* Registro de domínios (Whois)")
+    st.write("* Similaridade de marcas")
+    st.write("* Padrões de fraude")
 
 st.title("🛡️ ShieldPhish Ultra")
 
