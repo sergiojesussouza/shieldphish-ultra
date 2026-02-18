@@ -281,19 +281,22 @@ with aba_links:
                     st.image(core['geo']['bandeira'], width=35)
                 st.text(f"País: {core['geo']['pais']}")
 
-                # --- LOGICA DE VALIDAÇÃO DO SSL ATUALIZADA ---
+                # --- LOGICA DE VALIDAÇÃO DO SSL COM CORES PERSONALIZADAS ---
                 if res['cert_idade'] is not None:
                     idade_ssl = res['cert_idade']
                     
                     if idade_ssl < 7:
-                        # 🔴 Faixa: Menos de 7 dias
-                        texto_ssl = f"`[✔] SSL 🛡️ SEGURANÇA RECENTE ({idade_ssl} dias)`"
+                        # 🔴 Faixa: Menos de 7 dias - Cor Vermelha
+                        texto_ssl = f":red[[✔] SSL 🛡️ SEGURANÇA RECENTE ({idade_ssl} dias)]"
+                        
                     elif 7 <= idade_ssl <= 30:
-                        # 🟡 Faixa: Entre 7 e 30 dias
-                        texto_ssl = f"`[✔] SSL 🛡️ SEGURANÇA ESTABELECIDA ({idade_ssl} dias)`"
+                        # 🟡 Faixa: Entre 7 e 30 dias - Cor Amarela
+                        # Nota: No Streamlit, 'orange' é usado para o tom amarelado/laranja
+                        texto_ssl = f":orange[[✔] SSL 🛡️ SEGURANÇA ESTABELECIDA ({idade_ssl} dias)]"
+
                     else:
-                        # 🟢 Faixa: Mais de 30 dias
-                        texto_ssl = f"`[✔✔] SSL 🛡️ PROTEÇÃO CONSOLIDADA ({idade_ssl} dias)`"
+                        # 🟢 Faixa: Mais de 30 dias - Cor Verde
+                        texto_ssl = f":green[[✔✔] SSL 🛡️ PROTEÇÃO CONSOLIDADA ({idade_ssl} dias)]"
                     
                     st.markdown(texto_ssl)
                 else:
