@@ -176,7 +176,7 @@ with st.sidebar:
     st.caption("Privacidade Garantida: Este sistema não armazena e-mails, senhas ou conteúdos analisados. A análise é processada em memória e descartada após a sessão.")
     st.markdown("---")
     st.markdown("**Fontes de Análise:**")
-    st.write("* Reputação global (VirusTotal)\n* Registro de domínios\n* Similaridade de marcas\n* Padrões de fraude")
+    st.write("* Reputação global (VirusTotal)\n* Análise visual em ambiente virtual isolado e seguro sandbox (Urlscan.io)\n* Registro de domínios(Whois)\n* Similaridade de marcas\n* Padrões de fraude")
 
 st.title("🛡️ ShieldPhish Ultra")
 
@@ -327,7 +327,7 @@ with aba_links:
                 st.info("📸🔐 Imagem gerada em ambiente isolado de segurança.")
                 
                 # 3. SINCRONISMO E CAPTURA
-                with st.spinner("⏳ Capturando evidência visual segura... aguarde 15 segundos.")
+                with st.spinner("⏳ Capturando evidência visual segura... aguarde 15 segundos."):
                     import time
                     time.sleep(20) # Delay essencial para carregar a foto real
                     
