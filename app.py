@@ -470,33 +470,33 @@ with col2:
                 🚨 O que fazer com este Identificador Malicioso?
             </h4>
             <ul style="color: white; list-style-type: disc; padding-left: 20px; margin: 0; font-size: 0.85rem;">
-                <li style="margin-bottom: 5px;"><b>Não forneça dados:</b> Nunca digite senhas ou CPFs em sites com alertas.</li>
-                <li style="margin-bottom: 5px;"><b>Feche a aba original:</b> Se veio de link externo, feche a página imediatamente.</li>
-                <li style="margin-bottom: 5px;"><b>Entenda o risco:</b> Este item já possui histórico de crimes ou vírus.</li>
-                <li><b>A visualização é segura:</b> A "Foto do Site" é gerada em ambiente isolado.</li>
+                <li style="margin-bottom: 5px;"><b>Não forneça dados:</b> Nunca digite senhas, CPFs ou números de cartões em sites onde o IP foi marcado com alertas vermelhos.</li>
+                <li style="margin-bottom: 5px;"><b>Feche a aba original:</b> Se você chegou a este site por um link de SMS ou E-mail, feche a página imediatamente.</li>
+                <li style="margin-bottom: 5px;"><b>Entenda o risco:</b> Um IP com muitos alertas significa que esse "endereço digital" já foi usado para hospedar vírus ou roubar informações de outras pessoas.</li>
+                <li><b>A visualização é segura:</b> Você pode observar a "Foto do Site" aqui no sistema sem perigo, pois ela foi gerada em um ambiente isolado de segurança.</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
 
             with st.expander("📚 Entenda melhor os Identificadores Digitais"):
-                st.markdown("""
-                ### 🌐 **IP (Internet Protocol)**
-                O IP é o endereço real da máquina que hospeda o site. Quando ele é marcado como malicioso, é porque aquele computador específico já foi detectado cometendo crimes digitais ou enviando ataques.
+            st.markdown("""
+            ### 🌐 **IP (Internet Protocol)**
+            O IP é o endereço real da máquina que hospeda o site. Quando ele é marcado como malicioso, é porque aquele computador específico já foi detectado cometendo crimes digitais ou enviando ataques.
 
-                ### 🔗 **URL (Uniform Resource Locator)**
-                É o **"caminho completo"** que você digita no navegador para chegar a uma página específica (ex: `https://www.site.com/login`). 
-                Quando uma URL é maliciosa, significa que aquele link específico foi criado para roubar dados, baixar vírus ou enganar o usuário, mesmo que o site pareça legítimo.
+            ### 🔗 **URL (Uniform Resource Locator)**
+            É o **"caminho completo"** que você digita no navegador para chegar a uma página específica (ex: `https://www.site.com/login`). 
+            Quando uma URL é maliciosa, significa que aquele link específico foi criado para roubar dados, baixar vírus ou enganar o usuário, mesmo que o site pareça legítimo.
 
-                ### 🏠 **Domínio**
-                É o nome amigável do site (ex: `google.com` ou `stefanini.com`). O domínio serve para que não precisemos decorar o número do IP. 
-                Se um domínio é marcado como malicioso, é um sinal de alerta grave, pois indica que toda a reputação daquela "marca" na web está comprometida.
+            ### 🏠 **Domínio**
+            É o nome amigável do site (ex: `google.com` ou `stefanini.com`). O domínio serve para que não precisemos decorar o número do IP. 
+            Se um domínio é marcado como malicioso, é um sinal de alerta grave, pois indica que toda a reputação daquela "marca" na web está comprometida.
 
-                ### 🧬 **Hash**
-                O Hash funciona como a **"impressão digital"** única de um arquivo ou software. É um código gerado por algoritmos que não muda. 
-                Quando um Hash é identificado como malicioso, significa que aquele arquivo exato já foi confirmado como um malware (vírus, ransomware, etc.), não importa o nome que ele tenha.
-                """)
+            ### 🧬 **Hash**
+            O Hash funciona como a **"impressão digital"** única de um arquivo ou software. É um código gerado por algoritmos que não muda. 
+            Quando um Hash é identificado como malicioso, significa que aquele arquivo exato já foi confirmado como um malware (vírus, ransomware, etc.), não importa o nome que ele tenha.
+            """)
 
-                st.info("💡 **Dica de Segurança:** Sempre verifique a reputação desses itens em bases de inteligência antes de interagir com links suspeitos.")
+            st.info("💡 **Dica de Segurança:** Sempre verifique a reputação desses itens em bases de inteligência antes de interagir com links suspeitos.")
 
 # --- ABA 2: E-MAILS & VAZAMENTOS ---
 with aba_e_v:
